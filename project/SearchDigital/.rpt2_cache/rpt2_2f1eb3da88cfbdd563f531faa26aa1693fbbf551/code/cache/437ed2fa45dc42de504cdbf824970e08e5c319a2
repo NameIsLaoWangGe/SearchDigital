@@ -1,0 +1,4 @@
+{
+  "code": "export default class GameControl extends Laya.Script {\r\n    constructor() { super(); }\r\n    onEnable() {\r\n        this.initGameScene();\r\n    }\r\n    initGameScene() {\r\n        this.owner['scoreNum'].value = '0';\r\n    }\r\n    onDisable() {\r\n    }\r\n}\r\n",
+  "references": []
+}
