@@ -8,12 +8,16 @@ export default class DigitalCard extends Laya.Script {
 
     /**指代this.ower*/
     private self: Laya.Sprite;
+    /**主场景脚本*/
+    private gameControl;
 
     constructor() { super(); }
 
     onEnable(): void {
         this.self = this.owner as Laya.Sprite;
         this.self['DigitalCard'] = this;
+        this.gameControl = this.self.scene['Gamecontrol'];
+        this.cardClicksOn();
     }
 
     /**数字长度和底板的适配
@@ -43,6 +47,50 @@ export default class DigitalCard extends Laya.Script {
         this.board.pivotY = this.board.height / 2;
         // 数字和底板位置一样
         this.board.x = this.number.x;
+    }
+
+    /**开启点击事件*/
+    cardClicksOn(): void {
+        this.self.on(Laya.Event.MOUSE_DOWN, this, this.down);
+        this.self.on(Laya.Event.MOUSE_MOVE, this, this.move);
+        this.self.on(Laya.Event.MOUSE_UP, this, this.up);
+        this.self.on(Laya.Event.MOUSE_OUT, this, this.out);
+    }
+    /**关闭点击事件*/
+    cardClicksOnOff(): void {
+        this.self.off(Laya.Event.MOUSE_DOWN, this, this.down);
+        this.self.off(Laya.Event.MOUSE_MOVE, this, this.move);
+        this.self.off(Laya.Event.MOUSE_UP, this, this.up);
+        this.self.off(Laya.Event.MOUSE_OUT, this, this.out);
+    }
+    /**按下*/
+    down(event): void {
+        event.currentTarget.scale(0.9, 0.9);
+    }
+
+    /**消失动画*/
+    cardVanish(): void {
+        Laya.Tween.to(this.self, { scaleX: 0, scaleY: 0, alpha: 0 }, 200, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+            this.self.removeSelf();
+        }))
+    }
+
+    /**移动*/
+    move(event): void {
+        event.currentTarget.scale(1, 1);
+    }
+    /**抬起*/
+    up(event): void {
+        event.currentTarget.scale(1, 1);
+        let indicateNum = this.gameControl.indicateNum;
+        if (this.number.value === indicateNum.value) {
+            this.cardClicksOnOff();
+            this.cardVanish();
+        }
+    }
+    /**出屏幕*/
+    out(event): void {
+        event.currentTarget.scale(1, 1);
     }
 
     onDisable(): void {

@@ -10,7 +10,9 @@
         initGameScene() {
             this.self = this.owner;
             this.self['Gamecontrol'] = this;
-            this.levels = 10;
+            this.levels = 5;
+            this.timer = 0;
+            this.timeNum.value = '10s';
         }
         replacementCard() {
             this.indicateNumReset();
@@ -22,9 +24,17 @@
             let startX1 = this.cardParent.width / 4;
             let startX2 = this.cardParent.width * 3 / 4;
             let startY = this.cardParent.height / 2;
+            let noChengeI = Math.floor(Math.random() * 2);
+            let noChengeJ = Math.floor(Math.random() * this.levels + 1);
             for (let i = 0; i < 2; i++) {
                 for (let j = 1; j < this.levels + 1; j++) {
-                    let card = this.createCard();
+                    let card;
+                    if (i === noChengeI && j === noChengeJ) {
+                        card = this.createCard('nochange');
+                    }
+                    else {
+                        card = this.createCard('change');
+                    }
                     if (i % 2 === 0) {
                         card.x = startX1;
                     }
@@ -77,10 +87,15 @@
             }
             return numString;
         }
-        createCard() {
+        createCard(type) {
             let card = Laya.Pool.getItemByCreateFun('speakBox', this.digitalCard.create, this.digitalCard);
             this.cardParent.addChild(card);
-            card['DigitalCard'].number.value = this.changeAnumber();
+            if (type === 'change') {
+                card['DigitalCard'].number.value = this.changeAnumber();
+            }
+            else {
+                card['DigitalCard'].number.value = this.indicateNum.value;
+            }
             card['DigitalCard'].numAdaptiveBoard();
             return card;
         }
@@ -98,6 +113,23 @@
                 });
             }
         }
+        onUpdate() {
+            this.timer++;
+            if (this.timer % 60 == 0) {
+                let timeNum = this.timeNum.value;
+                let subNum;
+                if (timeNum.length === 3) {
+                    subNum = timeNum.substring(0, 2);
+                }
+                else if (timeNum.length === 2) {
+                    subNum = timeNum.substring(0, 1);
+                }
+                if (subNum === '0') {
+                    return;
+                }
+                this.timeNum.value = (Number(subNum) - 1).toString() + 's';
+            }
+        }
         onDisable() {
         }
     }
@@ -107,6 +139,8 @@
         onEnable() {
             this.self = this.owner;
             this.self['DigitalCard'] = this;
+            this.gameControl = this.self.scene['Gamecontrol'];
+            this.cardClicksOn();
         }
         numAdaptiveBoard() {
             let len = this.number.value.length;
@@ -128,6 +162,40 @@
             this.board.pivotX = this.board.width / 2;
             this.board.pivotY = this.board.height / 2;
             this.board.x = this.number.x;
+        }
+        cardClicksOn() {
+            this.self.on(Laya.Event.MOUSE_DOWN, this, this.down);
+            this.self.on(Laya.Event.MOUSE_MOVE, this, this.move);
+            this.self.on(Laya.Event.MOUSE_UP, this, this.up);
+            this.self.on(Laya.Event.MOUSE_OUT, this, this.out);
+        }
+        cardClicksOnOff() {
+            this.self.off(Laya.Event.MOUSE_DOWN, this, this.down);
+            this.self.off(Laya.Event.MOUSE_MOVE, this, this.move);
+            this.self.off(Laya.Event.MOUSE_UP, this, this.up);
+            this.self.off(Laya.Event.MOUSE_OUT, this, this.out);
+        }
+        down(event) {
+            event.currentTarget.scale(0.9, 0.9);
+        }
+        cardVanish() {
+            Laya.Tween.to(this.self, { scaleX: 0, scaleY: 0, alpha: 0 }, 200, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+                this.self.removeSelf();
+            }));
+        }
+        move(event) {
+            event.currentTarget.scale(1, 1);
+        }
+        up(event) {
+            event.currentTarget.scale(1, 1);
+            let indicateNum = this.gameControl.indicateNum;
+            if (this.number.value === indicateNum.value) {
+                this.cardClicksOnOff();
+                this.cardVanish();
+            }
+        }
+        out(event) {
+            event.currentTarget.scale(1, 1);
         }
         onDisable() {
         }

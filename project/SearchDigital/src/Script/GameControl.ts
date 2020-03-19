@@ -25,6 +25,8 @@ export default class GameControl extends Laya.Script {
     private self: Laya.Scene;
     /**当前关卡数*/
     private levels: number;
+    /**时间线*/
+    private timer: number;
 
     constructor() { super(); }
 
@@ -37,8 +39,9 @@ export default class GameControl extends Laya.Script {
     initGameScene(): void {
         this.self = this.owner as Laya.Scene;
         this.self['Gamecontrol'] = this;//脚本属性化
-        this.levels = 10;
-        // this.clearAllCard();
+        this.levels = 5;
+        this.timer = 0;
+        this.timeNum.value = '10s';
     }
 
     /**牌局开始*/
@@ -58,11 +61,19 @@ export default class GameControl extends Laya.Script {
         let startX1 = this.cardParent.width / 4;
         let startX2 = this.cardParent.width * 3 / 4;
         let startY = this.cardParent.height / 2;
+        //随机一个值不去修改
+        let noChengeI = Math.floor(Math.random() * 2);
+        let noChengeJ = Math.floor(Math.random() * this.levels + 1);
         for (let i = 0; i < 2; i++) {
             // 从1开始循环，方便%2计算
             for (let j = 1; j < this.levels + 1; j++) {
                 // 数字长度等于关卡数
-                let card = this.createCard();
+                let card;
+                if (i === noChengeI && j === noChengeJ) {
+                    card = this.createCard('nochange');
+                } else {
+                    card = this.createCard('change');
+                }
                 // 横排位置
                 if (i % 2 === 0) {
                     card.x = startX1;
@@ -126,11 +137,17 @@ export default class GameControl extends Laya.Script {
         return numString;
     }
 
-    /**构建单个数字*/
-    createCard(): Laya.Sprite {
+    /**构建单个数字
+     * @param type 是否需要修改number值，因为其中有一个等于指示牌的值
+    */
+    createCard(type): Laya.Sprite {
         let card = Laya.Pool.getItemByCreateFun('speakBox', this.digitalCard.create, this.digitalCard) as Laya.Sprite;
         this.cardParent.addChild(card);
-        card['DigitalCard'].number.value = this.changeAnumber();
+        if (type === 'change') {
+            card['DigitalCard'].number.value = this.changeAnumber();
+        } else {
+            card['DigitalCard'].number.value = this.indicateNum.value;
+        }
         card['DigitalCard'].numAdaptiveBoard();
         return card;
     }
@@ -151,7 +168,22 @@ export default class GameControl extends Laya.Script {
         }
     }
 
-    /**提示数字和底板的适配*/
+    onUpdate(): void {
+        this.timer++;
+        if (this.timer % 60 == 0) {
+            let timeNum = this.timeNum.value;
+            let subNum;
+            if (timeNum.length === 3) {
+                subNum = timeNum.substring(0, 2);
+            } else if (timeNum.length === 2) {
+                subNum = timeNum.substring(0, 1);
+            }
+            if (subNum === '0') {
+                return;
+            }
+            this.timeNum.value = (Number(subNum) - 1).toString() + 's';
+        }
+    }
 
     onDisable(): void {
     }
