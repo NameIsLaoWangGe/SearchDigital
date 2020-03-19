@@ -1,4 +1,0 @@
-{
-  "code": "export default class DigitalCard extends Laya.Script {\r\n    constructor() { super(); }\r\n    onEnable() {\r\n        this.self = this.owner;\r\n        this.self['DigitalCard'] = this;\r\n    }\r\n    numAdaptiveBoard() {\r\n        let len = this.number.value.length;\r\n        this.board.width = 140 + (len - 1) * 30;\r\n        this.board.pivotX = this.board.width / 2;\r\n        this.board.pivotY = this.board.height / 2;\r\n        this.board.x = this.number.x;\r\n    }\r\n    onDisable() {\r\n    }\r\n}\r\n",
-  "references": []
-}

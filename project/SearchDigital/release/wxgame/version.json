@@ -1,0 +1,19 @@
+{
+  "Prefab/digitalCard.json": "Prefab/digitalCard-4327a98045.json",
+  "Scene/MainScene.json": "Scene/MainScene-4434ac03e9.json",
+  "UI/+0123456789ks.png": "UI/+0123456789ks-f7c557bdf5.png",
+  "UI/分割线.png": "UI/分割线-bd8e4b422b.png",
+  "UI/背景图.png": "UI/背景图-054a7e20cb.png",
+  "fileconfig.json": "fileconfig-09f0e2d5c3.json",
+  "index.js": "index-85e10f0052.js",
+  "js/bundle.js": "js/bundle-140cfd0ed4.js",
+  "libs/laya.core.js": "libs/laya-e321be89ad.core.js",
+  "libs/laya.physics.js": "libs/laya-72ffbbc060.physics.js",
+  "libs/laya.ui.js": "libs/laya-8f56f52742.ui.js",
+  "libs/laya.wxmini.js": "libs/laya-b41b6e440c.wxmini.js",
+  "res/atlas/UI.atlas": "res/atlas/UI-85c73bc934.atlas",
+  "res/atlas/UI.png": "res/atlas/UI-6981b9b74d.png",
+  "res/atlas/comp.atlas": "res/atlas/comp-00e969ccb5.atlas",
+  "res/atlas/comp.png": "res/atlas/comp-5fcbe06365.png",
+  "unpack.json": "unpack-b61e7fad0e.json"
+}
