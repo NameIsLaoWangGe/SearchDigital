@@ -10,56 +10,102 @@
         initGameScene() {
             this.self = this.owner;
             this.self['Gamecontrol'] = this;
-            this.levels = 5;
+            this.self.height = Laya.stage.height;
+            this.levels = 0;
+            this.levelsNum.value = this.levels.toString();
             this.timer = 0;
             this.timeNum.value = '10s';
+            this.timerSwitch = false;
         }
         replacementCard() {
-            this.indicateNumReset();
-            this.cardCollection();
+            this.levels++;
+            this.levelsNodeAni();
+            this.timeNum.value = '10s';
+        }
+        levelsNodeAni() {
+            let time = 150;
+            Laya.Tween.to(this.levelsNode, { scaleX: 0 }, time, null, Laya.Handler.create(this, function () {
+                this.levelsNum.alpha = 0;
+                Laya.Tween.to(this.levelsNode, { scaleX: 1 }, time, null, Laya.Handler.create(this, function () {
+                    Laya.Tween.to(this.levelsNode, { scaleX: 0 }, time, null, Laya.Handler.create(this, function () {
+                        Laya.Tween.to(this.levelsNode, { scaleX: 1 }, time - 50, null, Laya.Handler.create(this, function () {
+                            this.levelsNum.alpha = 1;
+                            this.levelsNum.value = this.levels.toString();
+                            this.indicateNodeAin();
+                        }), 0);
+                    }), 0);
+                }), 0);
+            }), 0);
         }
         cardCollection() {
-            let spacingY = 10;
+            let spacingY = 5;
             let cardCount = this.levels * 2;
             let startX1 = this.cardParent.width / 4;
             let startX2 = this.cardParent.width * 3 / 4;
-            let startY = this.cardParent.height / 2;
+            let startY = 100;
             let noChengeI = Math.floor(Math.random() * 2);
-            let noChengeJ = Math.floor(Math.random() * this.levels + 1);
-            for (let i = 0; i < 2; i++) {
-                for (let j = 1; j < this.levels + 1; j++) {
-                    let card;
-                    if (i === noChengeI && j === noChengeJ) {
-                        card = this.createCard('nochange');
+            let noChengeJ = Math.floor(Math.random() * 6);
+            let delayed = 10;
+            for (let j = 0; j < 6; j++) {
+                Laya.timer.once(delayed, this, function () {
+                    for (let i = 0; i < 2; i++) {
+                        let card;
+                        if (i === noChengeI && j === noChengeJ) {
+                            card = this.createCard('nochange');
+                        }
+                        else {
+                            card = this.createCard('change');
+                        }
+                        this.cardAppear(card);
+                        if (i % 2 === 0) {
+                            card.x = startX1;
+                        }
+                        else {
+                            card.x = startX2;
+                        }
+                        card.y = startY + j * (card.height + spacingY);
+                        if (i === 1 && j === this.levels - 1) {
+                            this.timerSwitch = true;
+                        }
                     }
-                    else {
-                        card = this.createCard('change');
-                    }
-                    if (i % 2 === 0) {
-                        card.x = startX1;
-                    }
-                    else {
-                        card.x = startX2;
-                    }
-                    if (j % 2 === 0) {
-                        card.y = startY + (j / 2) * (card.height + spacingY);
-                    }
-                    else {
-                        card.y = startY - (j - 1) / 2 * (card.height + spacingY);
-                    }
-                }
+                });
+                delayed += 300;
             }
-            this.levels++;
+        }
+        cardAppear(card) {
+            let time = 100;
+            Laya.Tween.to(card, { alpha: 1 }, time, null, Laya.Handler.create(this, function () {
+                Laya.Tween.to(card, { scaleY: 0 }, time, null, Laya.Handler.create(this, function () {
+                    let number = card.getChildByName('number');
+                    number.alpha = 1;
+                    Laya.Tween.to(card, { scaleY: 1 }, time, null, Laya.Handler.create(this, function () {
+                    }), 0);
+                }), 0);
+            }), 0);
+        }
+        indicateNodeAin() {
+            let time = 150;
+            Laya.Tween.to(this.indicateCard, { scaleY: 0 }, time, null, Laya.Handler.create(this, function () {
+                this.indicateNum.alpha = 0;
+                Laya.Tween.to(this.indicateCard, { scaleY: 1 }, time, null, Laya.Handler.create(this, function () {
+                    Laya.Tween.to(this.indicateCard, { scaleY: 0 }, time, null, Laya.Handler.create(this, function () {
+                        Laya.Tween.to(this.indicateCard, { scaleY: 1 }, time - 50, null, Laya.Handler.create(this, function () {
+                            this.indicateNum.alpha = 1;
+                            this.indicateNumReset();
+                            this.cardCollection();
+                        }), 0);
+                    }), 0);
+                }), 0);
+            }), 0);
         }
         indicateNumReset() {
-            this.levels;
             let num1 = Math.floor(Math.random() * 9) + 1;
             let overlen = this.levels - 1;
             let num = num1.toString();
             for (let i = 0; i < overlen; i++) {
                 num += Math.floor(Math.random() * 10).toString();
             }
-            let scale = 1 - (this.levels - 8) * 0.05;
+            let scale = 1 - (this.levels - 2) * 0.04;
             this.indicateNum.scale(scale, scale);
             this.indicateNum.value = num;
             this.changeAnumber();
@@ -69,7 +115,7 @@
             for (let i = 0; i < this.indicateNum.value.length; i++) {
                 arr.push(this.indicateNum.value[i]);
             }
-            let random = Math.floor(Math.random() * (arr.length - 1)) + 1;
+            let random = Math.floor(Math.random() * (arr.length - 1));
             let originalNum = arr[random];
             let randomNum = Math.floor(Math.random() * 10).toString();
             while (originalNum === randomNum) {
@@ -96,7 +142,6 @@
             else {
                 card['DigitalCard'].number.value = this.indicateNum.value;
             }
-            card['DigitalCard'].numAdaptiveBoard();
             return card;
         }
         clearAllCard() {
@@ -109,25 +154,28 @@
                     card.alpha = 0;
                     if (i === len - 1) {
                         this.cardParent.removeChildren(0, len - 1);
+                        this.replacementCard();
                     }
                 });
             }
         }
         onUpdate() {
-            this.timer++;
-            if (this.timer % 60 == 0) {
-                let timeNum = this.timeNum.value;
-                let subNum;
-                if (timeNum.length === 3) {
-                    subNum = timeNum.substring(0, 2);
+            if (this.timerSwitch) {
+                this.timer++;
+                if (this.timer % 60 == 0) {
+                    let timeNum = this.timeNum.value;
+                    let subNum;
+                    if (timeNum.length === 3) {
+                        subNum = timeNum.substring(0, 2);
+                    }
+                    else if (timeNum.length === 2) {
+                        subNum = timeNum.substring(0, 1);
+                    }
+                    if (subNum === '0') {
+                        return;
+                    }
+                    this.timeNum.value = (Number(subNum) - 1).toString() + 's';
                 }
-                else if (timeNum.length === 2) {
-                    subNum = timeNum.substring(0, 1);
-                }
-                if (subNum === '0') {
-                    return;
-                }
-                this.timeNum.value = (Number(subNum) - 1).toString() + 's';
             }
         }
         onDisable() {
@@ -140,28 +188,57 @@
             this.self = this.owner;
             this.self['DigitalCard'] = this;
             this.gameControl = this.self.scene['Gamecontrol'];
+            this.cardParent = this.gameControl.cardParent;
+            this.levels = this.gameControl.levels;
+            this.number.alpha = 0;
+            this.self.alpha = 0;
+            let scale = 1 - (this.levels - 1) * 0.04;
+            this.number.scale(scale, scale);
             this.cardClicksOn();
         }
         numAdaptiveBoard() {
-            let len = this.number.value.length;
-            if (len <= 3) {
-                this.board.width = len * 40 + 80;
-            }
-            else if (len >= 3 && len <= 6) {
-                this.board.width = len * 40 + 50;
-            }
-            this.board.height = 135 - (len - 1) * 6;
-            let scale = 1 - (len - 1) * 0.05;
-            this.number.scale(scale, scale);
-            this.self.height = this.board.height;
+            this.setHeightAndY();
             this.self.pivotY = this.self.height / 2;
             this.board.x = this.self.pivotX;
             this.board.y = this.self.pivotY;
-            this.number.x = this.self.pivotX;
-            this.number.y = this.self.pivotY * 1.1;
+            this.number.x = this.board.x;
+            this.number.y = this.board.y * 1.1;
             this.board.pivotX = this.board.width / 2;
             this.board.pivotY = this.board.height / 2;
             this.board.x = this.number.x;
+        }
+        setHeightAndY() {
+            switch (this.levels) {
+                case 1:
+                    this.board.height = 200;
+                    this.self.height = this.board.height;
+                    this.self.y += this.cardParent.height / 3;
+                    break;
+                case 2:
+                    this.board.height = 200;
+                    this.self.height = this.board.height;
+                    this.self.y += this.cardParent.height / 3;
+                    break;
+                case 3:
+                    this.board.height = 150;
+                    this.self.height = this.board.height;
+                    this.self.y += this.cardParent.height / 3;
+                    break;
+                case 4:
+                    break;
+                case 5:
+                    break;
+                default:
+                    this.board.height = 135 - (this.levels - 1) * 6;
+                    let scale = 1 - (this.levels - 1) * 0.05;
+                    this.number.scale(scale, scale);
+                    break;
+            }
+        }
+        cardwidth() {
+            let cardParent = this.gameControl.cardParent;
+            let parentW = cardParent.width;
+            let parentH = cardParent.height;
         }
         cardClicksOn() {
             this.self.on(Laya.Event.MOUSE_DOWN, this, this.down);
@@ -169,18 +246,26 @@
             this.self.on(Laya.Event.MOUSE_UP, this, this.up);
             this.self.on(Laya.Event.MOUSE_OUT, this, this.out);
         }
-        cardClicksOnOff() {
-            this.self.off(Laya.Event.MOUSE_DOWN, this, this.down);
-            this.self.off(Laya.Event.MOUSE_MOVE, this, this.move);
-            this.self.off(Laya.Event.MOUSE_UP, this, this.up);
-            this.self.off(Laya.Event.MOUSE_OUT, this, this.out);
+        cardClicksOnOff(node) {
+            node.off(Laya.Event.MOUSE_DOWN, this, this.down);
+            node.off(Laya.Event.MOUSE_MOVE, this, this.move);
+            node.off(Laya.Event.MOUSE_UP, this, this.up);
+            node.off(Laya.Event.MOUSE_OUT, this, this.out);
+        }
+        allCardClicksOff() {
+            let cardParent = this.gameControl.cardParent;
+            for (let i = 0; i < cardParent._children.length; i++) {
+                let card = cardParent._children[i];
+                this.cardClicksOnOff(card);
+            }
         }
         down(event) {
-            event.currentTarget.scale(0.9, 0.9);
+            event.currentTarget.scale(1.1, 1.1);
         }
         cardVanish() {
-            Laya.Tween.to(this.self, { scaleX: 0, scaleY: 0, alpha: 0 }, 200, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+            Laya.Tween.to(this.self, { scaleX: 0, scaleY: 0, alpha: 0 }, 200, null, Laya.Handler.create(this, function () {
                 this.self.removeSelf();
+                this.gameControl.clearAllCard();
             }));
         }
         move(event) {
@@ -190,7 +275,7 @@
             event.currentTarget.scale(1, 1);
             let indicateNum = this.gameControl.indicateNum;
             if (this.number.value === indicateNum.value) {
-                this.cardClicksOnOff();
+                this.allCardClicksOff();
                 this.cardVanish();
             }
         }

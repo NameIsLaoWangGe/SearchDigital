@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"Scene",
-    "selectedBox":16,
-    "selecteID":17,
+    "selectedBox":23,
+    "selecteID":29,
     "searchKey":"Scene",
     "props":{"width":750,"sceneColor":"#000000","height":1334},
     "nodeParent":-1,
-    "maxID":21,
+    "maxID":31,
     "label":"Scene",
     "isOpen":true,
     "isDirectory":true,
@@ -31,65 +31,8 @@
         {
             "x":15,
             "type":"Sprite",
-            "searchKey":"Sprite,scoreParent,scoreParent",
-            "props":{"y":146,"x":375,"width":750,"var":"scoreParent","pivotY":60,"pivotX":375,"name":"scoreParent","height":93},
-            "nodeParent":2,
-            "label":"scoreParent",
-            "isOpen":true,
-            "isDirectory":true,
-            "isAniNode":true,
-            "hasChild":true,
-            "compId":9,
-            "child":[
-                {
-                    "x":30,
-                    "type":"FontClip",
-                    "searchKey":"FontClip,scoreNum,scoreNum",
-                    "props":{"y":16,"x":134,"var":"scoreNum","value":"646465","spaceX":-8,"skin":"UI/+0123456789ks.png","sheet":"+0123456789ks","name":"scoreNum"},
-                    "nodeParent":9,
-                    "label":"scoreNum",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":12,
-                    "child":[
-                        ]
-                },
-                {
-                    "x":30,
-                    "type":"Sprite",
-                    "searchKey":"Sprite,icon_Score",
-                    "props":{"y":0,"x":51,"texture":"UI/分数图标.png","name":"icon_Score"},
-                    "nodeParent":9,
-                    "label":"icon_Score",
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":11,
-                    "child":[
-                        ]
-                },
-                {
-                    "x":30,
-                    "type":"Sprite",
-                    "searchKey":"Sprite,cut-offRule",
-                    "props":{"y":83,"x":32,"texture":"UI/分割线.png","name":"cut-offRule"},
-                    "nodeParent":9,
-                    "label":"cut-offRule",
-                    "isOpen":true,
-                    "isDirectory":false,
-                    "isAniNode":true,
-                    "hasChild":false,
-                    "compId":10,
-                    "child":[
-                        ]
-                }]
-        },
-        {
-            "x":15,
-            "type":"Sprite",
             "searchKey":"Sprite,indicateCard,indicateCard",
-            "props":{"y":269,"x":287,"width":497,"var":"indicateCard","texture":"UI/任务.png","pivotY":69,"pivotX":249,"name":"indicateCard","height":138},
+            "props":{"y":168,"x":420,"width":396,"var":"indicateCard","pivotY":69,"pivotX":249,"name":"indicateCard","height":138},
             "nodeParent":2,
             "label":"indicateCard",
             "isOpen":true,
@@ -100,9 +43,23 @@
             "child":[
                 {
                     "x":30,
+                    "type":"Image",
+                    "searchKey":"Image",
+                    "props":{"y":69,"x":189,"width":394,"skin":"UI/任务.png","sizeGrid":"0,33,0,33","pivotY":69,"pivotX":189,"height":138},
+                    "nodeParent":13,
+                    "label":"Image",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":22,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
                     "type":"FontClip",
                     "searchKey":"FontClip,indicateNum,indicateNum",
-                    "props":{"y":69.25,"x":242.5,"width":670,"var":"indicateNum","value":"100","spaceX":-8,"skin":"UI/+0123456789ks.png","sheet":"+0123456789ks","pivotY":24,"pivotX":335,"name":"indicateNum","height":47,"align":"center"},
+                    "props":{"y":69,"x":198,"width":670,"var":"indicateNum","value":"100","spaceX":-8,"skin":"UI/+0123456789ks.png","sheet":"+0123456789ks","pivotY":24,"pivotX":335,"name":"indicateNum","height":47,"align":"center"},
                     "nodeParent":13,
                     "label":"indicateNum",
                     "isDirectory":false,
@@ -117,7 +74,7 @@
             "x":15,
             "type":"Sprite",
             "searchKey":"Sprite,timeCard,timeCard",
-            "props":{"y":199,"x":552,"var":"timeCard","texture":"UI/时间.png","name":"timeCard"},
+            "props":{"y":168,"x":642,"width":136,"var":"timeCard","texture":"UI/时间.png","pivotY":70,"pivotX":68,"name":"timeCard","height":139},
             "nodeParent":2,
             "label":"timeCard",
             "isOpen":true,
@@ -145,7 +102,7 @@
             "x":15,
             "type":"Sprite",
             "searchKey":"Sprite,cardParent,cardParent",
-            "props":{"y":783,"x":375,"width":710,"var":"cardParent","pivotY":408,"pivotX":355,"name":"cardParent","height":892},
+            "props":{"y":793,"x":375,"width":710,"var":"cardParent","pivotY":496,"pivotX":355,"name":"cardParent","height":970},
             "nodeParent":2,
             "label":"cardParent",
             "isOpen":true,
@@ -163,13 +120,70 @@
             "source":"src/Script/GameControl.ts",
             "searchKey":"Script,GameControl",
             "removeAble":true,
-            "props":{"timeNum":"@node:17","timeCard":"@node:16","scoreParent":"@node:9","scoreNum":"@node:12","indicateNum":"@node:15","indicateCard":"@node:13","digitalCard":"@Prefab:Prefab/digitalCard.prefab","cardParent":"@node:18"},
+            "props":{"timeNum":"@node:17","timeCard":"@node:16","levelsNum":"@node:27","levelsNode":"@node:23","levels":"@node:23","levelNode":"@node:23","indicateNum":"@node:15","indicateCard":"@node:13","digitalCard":"@Prefab:Prefab/digitalCard.prefab","cardParent":"@node:18"},
             "nodeParent":2,
             "label":"GameControl",
             "isDirectory":false,
             "isAniNode":true,
             "hasChild":false,
             "compId":20,
+            "child":[
+                ]
+        },
+        {
+            "x":15,
+            "type":"Sprite",
+            "searchKey":"Sprite,levelsNode,levelsNode",
+            "props":{"y":168,"x":102,"width":122,"var":"levelsNode","pivotY":65,"pivotX":61,"name":"levelsNode","height":130},
+            "nodeParent":2,
+            "label":"levelsNode",
+            "isOpen":true,
+            "isDirectory":true,
+            "isAniNode":true,
+            "hasChild":true,
+            "compId":23,
+            "child":[
+                {
+                    "x":30,
+                    "type":"Image",
+                    "searchKey":"Image,levelsBorde",
+                    "props":{"skin":"UI/关卡数.png","name":"levelsBorde"},
+                    "nodeParent":23,
+                    "label":"levelsBorde",
+                    "isOpen":true,
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":25,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"FontClip",
+                    "searchKey":"FontClip,levelsNum,levelsNum",
+                    "props":{"y":65,"x":62,"width":122,"var":"levelsNum","value":"1","skin":"UI/+0123456789ks.png","sheet":"+0123456789sk","pivotY":22,"pivotX":61,"name":"levelsNum","height":43,"align":"center"},
+                    "nodeParent":23,
+                    "label":"levelsNum",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":27,
+                    "child":[
+                        ]
+                }]
+        },
+        {
+            "x":15,
+            "type":"Sprite",
+            "searchKey":"Sprite,line",
+            "props":{"y":256,"x":23,"texture":"UI/分割线.png","name":"line"},
+            "nodeParent":2,
+            "label":"line",
+            "isDirectory":false,
+            "isAniNode":true,
+            "hasChild":false,
+            "compId":30,
             "child":[
                 ]
         }],
