@@ -21,6 +21,12 @@ export default class GameControl extends Laya.Script {
     /** @prop {name:levelsNum, tips:"关卡数", type:Node}*/
     public levelsNum: Laya.FontClip;
 
+    /** @prop {name:background, tips:"背景图", type:Node}*/
+    public background: Laya.Sprite;
+
+    /** @prop {name:gameOVer, tips:"游戏结束预制体", type:Prefab}*/
+    public gameOVer: Laya.Prefab;
+
     /**指代this.ower,指代当前场景*/
     private self: Laya.Scene;
     /**时间线*/
@@ -50,16 +56,27 @@ export default class GameControl extends Laya.Script {
         this.timerSwitch = false;
     }
 
+    /**自适应规则*/
+    adaptiveRule(): void {
+        this.background.height = Laya.stage.height;
+        let line = this.self.getChildByName('line') as Laya.Sprite;
+        line.y = Laya.stage.height * 0.19;
+        this.levelsNode.y = 0.12;
+        this.indicateCard.y = 0.12;
+        this.timeCard.y = 0.12;
+        this.cardParent.y = 0.22;
+    }
+
     /**牌局开始*/
     replacementCard(): void {
         this.levels++;
         this.levelsNodeAni();
-        this.timeNum.value = '10s';
+        this.timeNum.value = '3s';
     }
 
     /**等级动画*/
     levelsNodeAni(): void {
-        let time = 150;
+        let time = 120;
         Laya.Tween.to(this.levelsNode, { scaleX: 0 }, time, null, Laya.Handler.create(this, function () {
             this.levelsNum.alpha = 0;
             Laya.Tween.to(this.levelsNode, { scaleX: 1 }, time, null, Laya.Handler.create(this, function () {
@@ -79,77 +96,92 @@ export default class GameControl extends Laya.Script {
     */
     cardCollection(): void {
         let spacingY = 5;
-        // 卡牌数量是关卡数量的2倍
-        let cardCount = this.levels * 2;
+        // 卡牌数量是固定的
         let startX1 = this.cardParent.width / 4;
         let startX2 = this.cardParent.width * 3 / 4;
-        let startY = 100;
-        //随机一个值不去修改
-        let noChengeI = Math.floor(Math.random() * 2);
-        let noChengeJ = Math.floor(Math.random() * 6);
-        let delayed = 10;
-        // 从上往下
-        for (let j = 0; j < 6; j++) {
+        let len = 14;//总数
+        let noChengeJ = Math.floor(Math.random() * len);//随机一个卡牌数字不变
+        let delayed = 10;// 延时变量
+        // 从下往上
+        for (let j = 0; j < len; j++) {
+            delayed += 50;
+            // 修改数字
+            let card;
+            if (j === noChengeJ) {
+                card = this.createCard('nochange');
+            } else {
+                card = this.createCard('change');
+            }
+            // 初始位置
+            card.y = 1500;
+            //目标位置
+            let tagetY;
+            if (j % 2 === 0) {
+                card.x = startX1;
+                tagetY = j / 2 * (card.height + spacingY) + 80;
+            } else {
+                card.x = startX2;
+                tagetY = (j - 1) / 2 * (card.height + spacingY) + 80;
+            }
+            // 随机一个角度
+            card.rotation = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
+            // 动画表现
+            let time = 500;
             Laya.timer.once(delayed, this, function () {
-                for (let i = 0; i < 2; i++) {
-                    // 数字长度等于关卡数
-                    let card;
-                    if (i === noChengeI && j === noChengeJ) {
-                        card = this.createCard('nochange');
-                    } else {
-                        card = this.createCard('change');
-                    }
-                    this.cardAppear(card);
-                    // 横排位置
-                    if (i % 2 === 0) {
-                        card.x = startX1;
-                    } else {
-                        card.x = startX2;
-                    }
-                    // 竖排位置
-                    card.y = startY + j * (card.height + spacingY);
-
-                    //开启时间倒计时
-                    if (i === 1 && j === this.levels - 1) {
+                Laya.Tween.to(card, { y: tagetY, rotation: 0 }, time, Laya.Ease.circOut, Laya.Handler.create(this, function () {
+                    // 开启时间倒计时
+                    // 并且开启点击事件
+                    if (j === len - 1) {
                         this.timerSwitch = true;
+                        for (let index = 0; index < this.cardParent._children.length; index++) {
+                            const card = this.cardParent._children[index];
+                            card['DigitalCard'].cardClicksOn();
+                        }
                     }
-                }
-            });
-            delayed += 300;
+                }));
+            })
         }
     }
 
-    /**卡牌出现的翻转动画*/
-    cardAppear(card: Laya.Sprite): void {
-        let time = 100;
-        Laya.Tween.to(card, { alpha: 1 }, time, null, Laya.Handler.create(this, function () {
-            Laya.Tween.to(card, { scaleY: 0 }, time, null, Laya.Handler.create(this, function () {
-                let number = card.getChildByName('number') as Laya.FontClip;
-                number.alpha = 1;
-                Laya.Tween.to(card, { scaleY: 1 }, time, null, Laya.Handler.create(this, function () {
-                }), 0);
-            }), 0);
-        }), 0);
+    /**清除所有卡牌，顺序是从下到上和卡牌的出现相反
+     * @param type 有两个模式，一个是下一关，一个是失败结算
+    */
+    clearAllCard(type): void {
+        let len = this.cardParent._children.length;
+        let delayed = 0;
+        this.timerSwitch = false;//时间停止
+        for (let i = 0; i < len; i++) {
+            let card = this.cardParent._children[i] as Laya.Sprite;
+            delayed += 50;
+            Laya.timer.once(delayed, this, function () {
+                let rotate = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
+                Laya.Tween.to(card, { y: 1500, alpha: 0, rotation: rotate }, 800, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+                    if (i === len - 1) {
+                        this.cardParent.removeChildren(0, len - 1);
+                        if (type === 'gameOver') {
+                            this.createGameOver();
+                        } else if (type === 'nextLevel') {
+                            this.replacementCard();
+                        }
+                    }
+                }))
+            })
+        }
     }
-
     /**任务数字动画*/
     indicateNodeAin(): void {
-        let time = 150;
+        let time = 120;
         Laya.Tween.to(this.indicateCard, { scaleY: 0 }, time, null, Laya.Handler.create(this, function () {
             this.indicateNum.alpha = 0;
             Laya.Tween.to(this.indicateCard, { scaleY: 1 }, time, null, Laya.Handler.create(this, function () {
-                Laya.Tween.to(this.indicateCard, { scaleY: 0 }, time, null, Laya.Handler.create(this, function () {
-                    Laya.Tween.to(this.indicateCard, { scaleY: 1 }, time - 50, null, Laya.Handler.create(this, function () {
-                        this.indicateNum.alpha = 1;
-                        this.indicateNumReset();
-                        this.cardCollection();
-                    }), 0);
-                }), 0);
+                this.indicateNum.alpha = 1;
+                this.indicateNumReset();
+                this.cardCollection();
             }), 0);
         }), 0);
     }
 
-    /**关卡数对应的任务数字
+    /**关卡数对应的任的数字
     */
     indicateNumReset(): void {
         let num1 = Math.floor(Math.random() * 9) + 1;//保证第一个数字不等于0
@@ -158,7 +190,7 @@ export default class GameControl extends Laya.Script {
         for (let i = 0; i < overlen; i++) {
             num += Math.floor(Math.random() * 10).toString();//每次增加一个长度
         }
-        // 从第八关开始大小缩小
+        // 大小缩小
         let scale = 1 - (this.levels - 2) * 0.04;
         this.indicateNum.scale(scale, scale);
         this.indicateNum.value = num;
@@ -203,26 +235,20 @@ export default class GameControl extends Laya.Script {
         } else {
             card['DigitalCard'].number.value = this.indicateNum.value;
         }
-        // card['DigitalCard'].numAdaptiveBoard();
         return card;
     }
 
-    /**清除所有卡牌，顺序是从下到上和卡牌的出现相反*/
-    clearAllCard(): void {
-        let len = this.cardParent._children.length;
-        let delayed = 0;
-        for (let i = 0; i < len; i++) {
-            let card = this.cardParent._children[i] as Laya.Sprite;
-            delayed += 100;
-            Laya.timer.once(delayed, this, function () {
-                card.alpha = 0;
-                if (i === len - 1) {
-                    this.cardParent.removeChildren(0, len - 1);
-                    this.replacementCard();
-                }
-            })
-        }
+    /**创建结算界面*/
+    createGameOver(): void {
+        let gameOVer = Laya.Pool.getItemByCreateFun('speakBox', this.gameOVer.create, this.gameOVer) as Laya.Sprite;
+        this.self.addChild(gameOVer);
+
     }
+
+    /**关卡卡牌移动到中间最为最终分数*/
+     
+
+    /**创建游戏开始界面*/
 
     onUpdate(): void {
         // 倒计时
@@ -237,7 +263,8 @@ export default class GameControl extends Laya.Script {
                     subNum = timeNum.substring(0, 1);
                 }
                 if (subNum === '0') {
-                    return;
+                    this.timerSwitch = false;
+                    this.clearAllCard('gameOver');
                 }
                 this.timeNum.value = (Number(subNum) - 1).toString() + 's';
             }

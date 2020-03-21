@@ -24,68 +24,9 @@ export default class DigitalCard extends Laya.Script {
         this.gameControl = this.self.scene['Gamecontrol'];
         this.cardParent = this.gameControl.cardParent as Laya.Sprite;
         this.levels = this.gameControl.levels;
-        this.number.alpha = 0;
-        this.self.alpha = 0;
         // 数字随着长度而减小
         let scale = 1 - (this.levels - 1) * 0.04;
         this.number.scale(scale, scale);
-        this.cardClicksOn();
-        
-    }
-
-    /**数字长度和底板的适配
-     * 数字越长，底板越长
-     * */
-    numAdaptiveBoard(): void {
-        this.setHeightAndY();
-        // 保持和底板高度一致
-        this.self.pivotY = this.self.height / 2;
-        // 居中
-        this.board.x = this.self.pivotX;
-        this.board.y = this.self.pivotY;
-        this.number.x = this.board.x;
-        this.number.y = this.board.y * 1.1;//往下偏移一些
-        this.board.pivotX = this.board.width / 2;
-        this.board.pivotY = this.board.height / 2;
-        // 数字和底板位置一样
-        this.board.x = this.number.x;
-    }
-
-    /**设置高度，和位置偏移*/
-    setHeightAndY(): void {
-        switch (this.levels) {
-            case 1:
-                this.board.height = 200;
-                this.self.height = this.board.height;
-                this.self.y += this.cardParent.height / 3;
-                break;
-            case 2:
-                this.board.height = 200;
-                this.self.height = this.board.height;
-                this.self.y += this.cardParent.height / 3;
-                break;
-            case 3:
-                this.board.height = 150;
-                this.self.height = this.board.height;
-                this.self.y += this.cardParent.height / 3;
-                break;
-            case 4:
-                break;
-            case 5:
-                break;
-            default:
-                this.board.height = 135 - (this.levels - 1) * 6;
-                let scale = 1 - (this.levels - 1) * 0.05;
-                this.number.scale(scale, scale);
-                break;
-        }
-    }
-
-    /**根据子节点数量和父节点的大小设置宽度*/
-    cardwidth(): void {
-        let cardParent = this.gameControl.cardParent as Laya.Sprite;
-        let parentW = cardParent.width;
-        let parentH = cardParent.height;
     }
 
     /**开启点击事件*/
@@ -124,6 +65,8 @@ export default class DigitalCard extends Laya.Script {
             this.gameControl.clearAllCard();
         }))
     }
+
+
     /**移动*/
     move(event): void {
         event.currentTarget.scale(1, 1);
