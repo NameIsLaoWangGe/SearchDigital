@@ -62,7 +62,7 @@ export default class DigitalCard extends Laya.Script {
     cardVanish(): void {
         Laya.Tween.to(this.self, { scaleX: 0, scaleY: 0, alpha: 0 }, 200, null, Laya.Handler.create(this, function () {
             this.self.removeSelf();
-            this.gameControl.clearAllCard();
+            this.gameControl.clearAllCard('nextLevel');
         }))
     }
 

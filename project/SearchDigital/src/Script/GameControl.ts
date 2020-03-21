@@ -24,6 +24,9 @@ export default class GameControl extends Laya.Script {
     /** @prop {name:background, tips:"背景图", type:Node}*/
     public background: Laya.Sprite;
 
+    /** @prop {name:line, tips:"分割线", type:Node}*/
+    public line: Laya.Sprite;
+
     /** @prop {name:gameOVer, tips:"游戏结束预制体", type:Prefab}*/
     public gameOVer: Laya.Prefab;
 
@@ -245,8 +248,7 @@ export default class GameControl extends Laya.Script {
 
     }
 
-    /**关卡卡牌移动到中间最为最终分数*/
-     
+
 
     /**创建游戏开始界面*/
 
@@ -265,6 +267,7 @@ export default class GameControl extends Laya.Script {
                 if (subNum === '0') {
                     this.timerSwitch = false;
                     this.clearAllCard('gameOver');
+                    return;
                 }
                 this.timeNum.value = (Number(subNum) - 1).toString() + 's';
             }

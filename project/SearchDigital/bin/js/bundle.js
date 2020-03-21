@@ -186,6 +186,7 @@
                     if (subNum === '0') {
                         this.timerSwitch = false;
                         this.clearAllCard('gameOver');
+                        return;
                     }
                     this.timeNum.value = (Number(subNum) - 1).toString() + 's';
                 }
@@ -231,7 +232,7 @@
         cardVanish() {
             Laya.Tween.to(this.self, { scaleX: 0, scaleY: 0, alpha: 0 }, 200, null, Laya.Handler.create(this, function () {
                 this.self.removeSelf();
-                this.gameControl.clearAllCard();
+                this.gameControl.clearAllCard('nextLevel');
             }));
         }
         move(event) {
@@ -252,12 +253,113 @@
         }
     }
 
+    class GameOver extends Laya.Script {
+        constructor() { super(); }
+        onEnable() {
+            this.self = this.owner;
+            this.self['GameOVer'] = this;
+            this.gameControl = this.self.scene['Gamecontrol'];
+            this.levelsNode = this.gameControl.levelsNode;
+            this.indicateCard = this.gameControl.indicateCard;
+            this.timeCard = this.gameControl.timeCard;
+            this.line = this.gameControl.line;
+            this.self.width = 750;
+            this.self.height = Laya.stage.height;
+            this.self.pivotX = this.self.width / 2;
+            this.self.pivotY = this.self.height / 2;
+            this.self.pos(375, Laya.stage.height / 2);
+            this.logosSwitch = false;
+            this.logoChange = 'appear';
+            this.appaer();
+        }
+        appaer() {
+            this.logo.y = 1500;
+            this.logo.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
+            this.btn_again.y = 1500;
+            this.btn_again.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
+            this.btn_return.y = 1500;
+            this.btn_return.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
+            let time = 300;
+            Laya.Tween.to(this.logo, { y: 644, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
+                this.levelsGameOver();
+            }), 0);
+            Laya.Tween.to(this.btn_again, { y: 818, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
+            }), 150);
+            Laya.Tween.to(this.btn_return, { y: 818, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
+            }), 300);
+        }
+        levelsGameOver() {
+            let time = 250;
+            let targetX = Laya.stage.width / 2;
+            let targetY = this.logo.y + (this.self.y - this.self.height / 2) - 150;
+            let yPre = 1 / 2;
+            Laya.Tween.to(this.levelsNode, { x: targetX * yPre, y: targetY * yPre, rotation: 45 }, time, null, Laya.Handler.create(this, function () {
+                Laya.Tween.to(this.levelsNode, { x: targetX, y: targetY, rotation: 0, }, time, null, Laya.Handler.create(this, function () {
+                    this.clicksBtn();
+                    this.logosSwitch = true;
+                }), 0);
+            }), 0);
+            Laya.Tween.to(this.indicateCard, { alpha: 0 }, time * 2, null, Laya.Handler.create(this, function () {
+                this.clicksBtn();
+            }), 60);
+            Laya.Tween.to(this.timeCard, { alpha: 0 }, time * 2, null, Laya.Handler.create(this, function () {
+                this.clicksBtn();
+            }), 30);
+            Laya.Tween.to(this.line, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
+                this.clicksBtn();
+            }), 0);
+        }
+        clicksBtn() {
+            this.btn_again.on(Laya.Event.MOUSE_DOWN, this, this.down);
+            this.btn_again.on(Laya.Event.MOUSE_MOVE, this, this.move);
+            this.btn_again.on(Laya.Event.MOUSE_UP, this, this.up);
+            this.btn_again.on(Laya.Event.MOUSE_OUT, this, this.out);
+            this.btn_return.on(Laya.Event.MOUSE_DOWN, this, this.down);
+            this.btn_return.on(Laya.Event.MOUSE_MOVE, this, this.move);
+            this.btn_return.on(Laya.Event.MOUSE_UP, this, this.up);
+            this.btn_return.on(Laya.Event.MOUSE_OUT, this, this.out);
+        }
+        down(event) {
+            event.currentTarget.scale(1.1, 1.1);
+        }
+        move(event) {
+            event.currentTarget.scale(1, 1);
+        }
+        up(event) {
+            event.currentTarget.scale(1, 1);
+            if (event.currentTarget.name === 'btn_again') ;
+            else if (event.currentTarget.name === 'btn_return') ;
+        }
+        out(event) {
+            event.currentTarget.scale(1, 1);
+        }
+        onUpdate() {
+            if (this.logosSwitch) {
+                if (this.logoChange === 'appear') {
+                    this.logo.alpha -= 0.01;
+                    if (this.logo.alpha < 0.3) {
+                        this.logoChange = 'vanish';
+                    }
+                }
+                else if (this.logoChange === 'vanish') {
+                    this.logo.alpha += 0.01;
+                    if (this.logo.alpha >= 1) {
+                        this.logoChange = 'appear';
+                    }
+                }
+            }
+        }
+        onDisable() {
+        }
+    }
+
     class GameConfig {
         constructor() { }
         static init() {
             var reg = Laya.ClassUtils.regClass;
             reg("Script/GameControl.ts", GameControl);
             reg("Script/DigitalCard.ts", DigitalCard);
+            reg("Script/GameOver.ts", GameOver);
         }
     }
     GameConfig.width = 750;

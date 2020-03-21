@@ -8,11 +8,22 @@ export default class GameOver extends Laya.Script {
     /** @prop {name:btn_return, tips:"返回", type:Node}*/
     public btn_return: Laya.Sprite;
 
-
     /**指代this.ower*/
     private self: Laya.Sprite;
     /**主场景脚本*/
     private gameControl;
+    /**等级节点*/
+    private levelsNode: Laya.Sprite;
+    /**提示卡牌节点*/
+    private indicateCard: Laya.Sprite;
+    /**时间卡牌节点*/
+    private timeCard: Laya.Sprite;
+    /**时间卡牌节点*/
+    private line: Laya.Sprite;
+
+    /**logo的渐隐动画开关*/
+    private logosSwitch: boolean;
+    private logoChange: string;
 
     constructor() { super(); }
 
@@ -20,11 +31,133 @@ export default class GameOver extends Laya.Script {
         this.self = this.owner as Laya.Sprite;
         this.self['GameOVer'] = this;
         this.gameControl = this.self.scene['Gamecontrol'];
+        this.levelsNode = this.gameControl.levelsNode as Laya.Sprite;
+        this.indicateCard = this.gameControl.indicateCard as Laya.Sprite;
+        this.timeCard = this.gameControl.timeCard as Laya.Sprite;
+        this.line = this.gameControl.line as Laya.Sprite;
+
         this.self.width = 750;
         this.self.height = Laya.stage.height;
         this.self.pivotX = this.self.width / 2;
         this.self.pivotY = this.self.height / 2;
-        this.self.pos(375, 0);
+        this.self.pos(375, Laya.stage.height / 2);
+
+        this.logosSwitch = false;
+        this.logoChange = 'appear';
+
+        this.appaer();
+    }
+
+    /**出现动画*/
+    appaer(): void {
+        this.logo.y = 1500;
+        this.logo.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
+
+        this.btn_again.y = 1500;
+        this.btn_again.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
+
+        this.btn_return.y = 1500;
+        this.btn_return.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
+        let time = 300;
+        // logo 动画
+        Laya.Tween.to(this.logo, { y: 644, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
+            this.levelsGameOver();
+        }), 0);
+        // 返回按钮动画
+        Laya.Tween.to(this.btn_again, { y: 818, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
+        }), 150);
+        // 重来按钮动画
+        Laya.Tween.to(this.btn_return, { y: 818, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
+        }), 300);
+    }
+
+    /**关卡卡牌移动到中间做为最终分数*/
+    levelsGameOver(): void {
+        let time = 250;
+        // 关卡节点动画
+        let targetX = Laya.stage.width / 2;
+        let targetY = this.logo.y + (this.self.y - this.self.height / 2) - 150;//y在logo的世界坐标-100的位置
+        let yPre = 1 / 2;//这个是路线上的一个点站到整体的百分比
+        Laya.Tween.to(this.levelsNode, { x: targetX * yPre, y: targetY * yPre, rotation: 45 }, time, null, Laya.Handler.create(this, function () {
+            Laya.Tween.to(this.levelsNode, { x: targetX, y: targetY, rotation: 0, }, time, null, Laya.Handler.create(this, function () {
+                this.clicksBtn();
+                this.logosSwitch = true;
+            }), 0);
+        }), 0);
+
+        // 提示卡牌动画
+        Laya.Tween.to(this.indicateCard, { alpha: 0 }, time * 2, null, Laya.Handler.create(this, function () {
+            this.clicksBtn();
+        }), 60);
+
+        // 时间节点动画
+        Laya.Tween.to(this.timeCard, { alpha: 0 }, time * 2, null, Laya.Handler.create(this, function () {
+            this.clicksBtn();
+        }), 30);
+
+        // 分割线动画
+        Laya.Tween.to(this.line, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
+            this.clicksBtn();
+        }), 0);
+
+    }
+
+    /**重来*/
+    startAgain(): void {
+
+    }
+
+    /**两个按钮的点击事件*/
+    clicksBtn(): void {
+        this.btn_again.on(Laya.Event.MOUSE_DOWN, this, this.down);
+        this.btn_again.on(Laya.Event.MOUSE_MOVE, this, this.move);
+        this.btn_again.on(Laya.Event.MOUSE_UP, this, this.up);
+        this.btn_again.on(Laya.Event.MOUSE_OUT, this, this.out);
+
+        this.btn_return.on(Laya.Event.MOUSE_DOWN, this, this.down);
+        this.btn_return.on(Laya.Event.MOUSE_MOVE, this, this.move);
+        this.btn_return.on(Laya.Event.MOUSE_UP, this, this.up);
+        this.btn_return.on(Laya.Event.MOUSE_OUT, this, this.out);
+    }
+
+    /**按下*/
+    down(event): void {
+        event.currentTarget.scale(1.1, 1.1);
+
+    }
+    /**移动*/
+    move(event): void {
+        event.currentTarget.scale(1, 1);
+
+    }
+    /**抬起*/
+    up(event): void {
+        event.currentTarget.scale(1, 1);
+        if (event.currentTarget.name === 'btn_again') {
+
+        } else if (event.currentTarget.name === 'btn_return') {
+
+        }
+    }
+    /**出屏幕*/
+    out(event): void {
+        event.currentTarget.scale(1, 1);
+    }
+
+    onUpdate(): void {
+        if (this.logosSwitch) {
+            if (this.logoChange === 'appear') {
+                this.logo.alpha -= 0.01;
+                if (this.logo.alpha < 0.3) {
+                    this.logoChange = 'vanish';
+                }
+            } else if (this.logoChange === 'vanish') {
+                this.logo.alpha += 0.01;
+                if (this.logo.alpha >= 1) {
+                    this.logoChange = 'appear';
+                }
+            }
+        }
     }
 
     onDisable(): void {
