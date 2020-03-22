@@ -67,7 +67,7 @@ export default class GameOver extends Laya.Script {
         Laya.Tween.to(this.btn_again, { y: 818, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
         }), 150);
         // 重来按钮动画
-        Laya.Tween.to(this.btn_return, { y: 818, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
+        Laya.Tween.to(this.btn_return, { y: 822, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
         }), 300);
     }
 
@@ -80,24 +80,23 @@ export default class GameOver extends Laya.Script {
         let Pre = 1 / 2;//这个是路线上的一个点站到整体的百分比
         Laya.Tween.to(this.levelsNode, { x: targetX * Pre, y: targetY * Pre, rotation: 45 }, time, null, Laya.Handler.create(this, function () {
             Laya.Tween.to(this.levelsNode, { x: targetX, y: targetY, rotation: 0, }, time, null, Laya.Handler.create(this, function () {
-                this.clicksBtn();
                 this.logosSwitch = true;
             }), 0);
-        }), 0);
+        }), 30);
+
+        this.levelsNode['LevelsNode'].levelsNodeAni('common', 100);//这个是旋转动画
 
         // 提示卡牌动画
         Laya.Tween.to(this.indicateCard, { alpha: 0 }, time * 2, null, Laya.Handler.create(this, function () {
-            this.clicksBtn();
+            this.clicksOnBtn();
         }), 60);
 
         // 时间节点动画
         Laya.Tween.to(this.timeCard, { alpha: 0 }, time * 2, null, Laya.Handler.create(this, function () {
-            this.clicksBtn();
         }), 30);
 
         // 分割线动画
         Laya.Tween.to(this.line, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
-            this.clicksBtn();
         }), 0);
 
     }
@@ -111,7 +110,7 @@ export default class GameOver extends Laya.Script {
 
     /**关卡卡牌移动到中间做为最终分数*/
     homing(): void {
-        let time = 300;
+        let time = 250;
         // 关卡节点动画
         let targetX = 108;//排好的位置不变
         let targetY = this.indicateCard.y;//y轴和时间、提示卡牌位置一样
@@ -124,18 +123,15 @@ export default class GameOver extends Laya.Script {
 
         // 提示卡牌动画
         Laya.Tween.to(this.indicateCard, { alpha: 1 }, time * 2, null, Laya.Handler.create(this, function () {
-            this.clicksBtn();
-        }), 0);
+        }), 100);
 
         // 时间节点动画
         Laya.Tween.to(this.timeCard, { alpha: 1 }, time * 2, null, Laya.Handler.create(this, function () {
-            this.clicksBtn();
-        }), 30);
+        }), 200);
 
         // 分割线动画
         Laya.Tween.to(this.line, { alpha: 1 }, time, null, Laya.Handler.create(this, function () {
-            this.clicksBtn();
-        }), 60);
+        }), 500);
     }
 
     /**出现动画*/
@@ -160,7 +156,7 @@ export default class GameOver extends Laya.Script {
 
 
     /**两个按钮的点击事件*/
-    clicksBtn(): void {
+    clicksOnBtn(): void {
         this.btn_again.on(Laya.Event.MOUSE_DOWN, this, this.down);
         this.btn_again.on(Laya.Event.MOUSE_MOVE, this, this.move);
         this.btn_again.on(Laya.Event.MOUSE_UP, this, this.up);
@@ -170,6 +166,19 @@ export default class GameOver extends Laya.Script {
         this.btn_return.on(Laya.Event.MOUSE_MOVE, this, this.move);
         this.btn_return.on(Laya.Event.MOUSE_UP, this, this.up);
         this.btn_return.on(Laya.Event.MOUSE_OUT, this, this.out);
+    }
+
+    /**两个按钮的点击事件*/
+    clicksOffBtn(): void {
+        this.btn_again.off(Laya.Event.MOUSE_DOWN, this, this.down);
+        this.btn_again.off(Laya.Event.MOUSE_MOVE, this, this.move);
+        this.btn_again.off(Laya.Event.MOUSE_UP, this, this.up);
+        this.btn_again.off(Laya.Event.MOUSE_OUT, this, this.out);
+
+        this.btn_return.off(Laya.Event.MOUSE_DOWN, this, this.down);
+        this.btn_return.off(Laya.Event.MOUSE_MOVE, this, this.move);
+        this.btn_return.off(Laya.Event.MOUSE_UP, this, this.up);
+        this.btn_return.off(Laya.Event.MOUSE_OUT, this, this.out);
     }
 
     /**按下*/
@@ -185,6 +194,7 @@ export default class GameOver extends Laya.Script {
     /**抬起*/
     up(event): void {
         event.currentTarget.scale(1, 1);
+        this.clicksOffBtn();
         if (event.currentTarget.name === 'btn_again') {
             this.startAgain();
         } else if (event.currentTarget.name === 'btn_return') {

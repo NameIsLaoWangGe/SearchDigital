@@ -13,6 +13,8 @@ export default class DigitalCard extends Laya.Script {
     private gameControl;
     /**父节点*/
     private cardParent;
+    /**提示卡牌*/
+    private indicateCard;
     /**关卡数*/
     private levels;
 
@@ -23,6 +25,7 @@ export default class DigitalCard extends Laya.Script {
         this.self['DigitalCard'] = this;
         this.gameControl = this.self.scene['Gamecontrol'];
         this.cardParent = this.gameControl.cardParent as Laya.Sprite;
+        this.indicateCard = this.gameControl.indicateCard as Laya.Sprite;
         this.levels = this.gameControl.levels;
         // 数字随着长度而减小
         let scale = 1 - (this.levels - 1) * 0.04;
@@ -37,20 +40,11 @@ export default class DigitalCard extends Laya.Script {
         this.self.on(Laya.Event.MOUSE_OUT, this, this.out);
     }
     /**关闭点击事件*/
-    cardClicksOnOff(node): void {
-        node.off(Laya.Event.MOUSE_DOWN, this, this.down);
-        node.off(Laya.Event.MOUSE_MOVE, this, this.move);
-        node.off(Laya.Event.MOUSE_UP, this, this.up);
-        node.off(Laya.Event.MOUSE_OUT, this, this.out);
-    }
-
-    /**关闭所有卡牌的点击事件*/
-    allCardClicksOff(): void {
-        let cardParent = this.gameControl.cardParent as Laya.Sprite;
-        for (let i = 0; i < cardParent._children.length; i++) {
-            let card = cardParent._children[i];
-            this.cardClicksOnOff(card);
-        }
+    cardClicksOff(): void {
+        this.self.off(Laya.Event.MOUSE_DOWN, this, this.down);
+        this.self.off(Laya.Event.MOUSE_MOVE, this, this.move);
+        this.self.off(Laya.Event.MOUSE_UP, this, this.up);
+        this.self.off(Laya.Event.MOUSE_OUT, this, this.out);
     }
 
     /**按下*/
@@ -58,14 +52,32 @@ export default class DigitalCard extends Laya.Script {
         event.currentTarget.scale(1.1, 1.1);
     }
 
-    /**消失动画*/
-    cardVanish(): void {
-        Laya.Tween.to(this.self, { scaleX: 0, scaleY: 0, alpha: 0 }, 200, null, Laya.Handler.create(this, function () {
-            this.self.removeSelf();
-            this.gameControl.clearAllCard('nextLevel');
-        }))
+    /**消失动画
+     * @param type 两个情况。一个是点错了，一个是对了，都会出现消失动画
+    */
+    cardVanish(type): void {
+        this.gameControl.clearAllClicks();
+        if (type === 'right') {
+            this.indicateCard['IndicateCard'].rightAni();
+            Laya.Tween.to(this.self, { y: this.self.y + 10 }, 50, null, Laya.Handler.create(this, function () {
+                Laya.Tween.to(this.self, { y: this.self.y - 20 }, 50, null, Laya.Handler.create(this, function () {
+                    Laya.Tween.to(this.self, { y: this.self.y + 10 }, 50, null, Laya.Handler.create(this, function () {
+                        this.gameControl.clearAllCard('nextLevel');
+                        this.self.removeSelf();
+                    }))
+                }))
+            }))
+        } else if (type === 'error') {
+            this.indicateCard['IndicateCard'].errorAni();
+            Laya.Tween.to(this.self, { x: this.self.x - 10 }, 50, null, Laya.Handler.create(this, function () {
+                Laya.Tween.to(this.self, { x: this.self.x + 20 }, 50, null, Laya.Handler.create(this, function () {
+                    Laya.Tween.to(this.self, { x: this.self.x - 10 }, 50, null, Laya.Handler.create(this, function () {
+                        this.gameControl.clearAllCard('gameOver');
+                    }))
+                }))
+            }))
+        }
     }
-
 
     /**移动*/
     move(event): void {
@@ -73,11 +85,13 @@ export default class DigitalCard extends Laya.Script {
     }
     /**抬起*/
     up(event): void {
+        this.cardClicksOff();
         event.currentTarget.scale(1, 1);
         let indicateNum = this.gameControl.indicateNum;
         if (this.number.value === indicateNum.value) {
-            this.allCardClicksOff();
-            this.cardVanish();
+            this.cardVanish('right');
+        } else {
+            this.cardVanish('error');
         }
     }
     /**出屏幕*/
