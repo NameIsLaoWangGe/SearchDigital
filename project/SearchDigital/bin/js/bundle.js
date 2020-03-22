@@ -73,17 +73,47 @@
            this.background.x = 0;
            this.background.y = 0;
            this.line.y = stageHeight * 0.19;
+           this.line.alpha = 0;
            this.levelsNode.y = stageHeight * 0.12;
+           this.levelsNode.alpha = 0;
            this.indicateCard.y = stageHeight * 0.12;
+           this.indicateCard.alpha = 0;
            this.timeCard.y = stageHeight * 0.12;
+           this.timeCard.alpha = 0;
            this.cardParent.y = stageHeight * 0.22;
        }
        createStartGame() {
            let startGame = Laya.Pool.getItemByCreateFun('startGame', this.startGame.create, this.startGame);
            this.self.addChild(startGame);
        }
+       otherVanish() {
+           let time = 200;
+           let delayed = 150;
+           Laya.Tween.to(this.levelsNode, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
+           }), 0);
+           Laya.Tween.to(this.indicateCard, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
+           }), delayed);
+           Laya.Tween.to(this.timeCard, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
+           }), delayed * 2);
+           Laya.Tween.to(this.line, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
+           }), delayed * 3);
+       }
+       otherAppear() {
+           let time = 200;
+           let delayed = 150;
+           Laya.Tween.to(this.levelsNode, { alpha: 1 }, time, null, Laya.Handler.create(this, function () {
+           }), 0);
+           Laya.Tween.to(this.indicateCard, { alpha: 1 }, time, null, Laya.Handler.create(this, function () {
+           }), delayed);
+           Laya.Tween.to(this.timeCard, { alpha: 1 }, time, null, Laya.Handler.create(this, function () {
+           }), delayed * 2);
+           Laya.Tween.to(this.line, { alpha: 1 }, time, null, Laya.Handler.create(this, function () {
+           }), delayed * 3);
+       }
        replacementCard(type) {
-           if (type === 'start') ;
+           if (type === 'start') {
+               this.levels = 0;
+           }
            else if (type === 'reStart') {
                this.levels = 0;
            }
@@ -202,6 +232,13 @@
        createGameOver() {
            let gameOVer = Laya.Pool.getItemByCreateFun('gameOVer', this.gameOVer.create, this.gameOVer);
            this.self.addChild(gameOVer);
+       }
+       adaptiveOther(self) {
+           self.width = 750;
+           self.height = Laya.stage.height;
+           self.pivotX = this.self.width / 2;
+           self.pivotY = this.self.height / 2;
+           self.pos(375, Laya.stage.height / 2);
        }
        onUpdate() {
            if (this.timerSwitch) {
@@ -339,23 +376,20 @@
            this.indicateCard = this.gameControl.indicateCard;
            this.timeCard = this.gameControl.timeCard;
            this.line = this.gameControl.line;
-           this.self.width = 750;
-           this.self.height = Laya.stage.height;
-           this.self.pivotX = this.self.width / 2;
-           this.self.pivotY = this.self.height / 2;
-           this.self.pos(375, Laya.stage.height / 2);
            this.logoSwitch = false;
            this.logoChange = 'appear';
+           this.gameControl.adaptiveOther(this.self);
            this.appaer();
        }
        appaer() {
-           this.logo.y = 1500;
+           let firstY = 1800;
+           this.logo.y = firstY;
            this.logo.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
-           this.btn_again.y = 1500;
+           this.btn_again.y = firstY;
            this.btn_again.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
-           this.btn_return.y = 1500;
+           this.btn_return.y = firstY;
            this.btn_return.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
-           let time = 300;
+           let time = 500;
            Laya.Tween.to(this.logo, { y: 644, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
                this.levelsGameOver();
            }), 0);
@@ -383,10 +417,7 @@
            Laya.Tween.to(this.line, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
            }), 0);
        }
-       startAgain() {
-           this.vanish();
-       }
-       homing() {
+       homing(type) {
            let time = 250;
            let targetX = 108;
            let targetY = this.indicateCard.y;
@@ -394,26 +425,34 @@
                Laya.Tween.to(this.levelsNode, { x: targetX, y: targetY, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
                }), 0);
            }), 0);
+           this.levelsNode['LevelsNode'].levelsNodeAni('common', 100);
            Laya.Tween.to(this.indicateCard, { alpha: 1 }, time * 2, null, Laya.Handler.create(this, function () {
            }), 100);
            Laya.Tween.to(this.timeCard, { alpha: 1 }, time * 2, null, Laya.Handler.create(this, function () {
            }), 200);
            Laya.Tween.to(this.line, { alpha: 1 }, time, null, Laya.Handler.create(this, function () {
+               if (type === 'again') {
+                   this.gameControl.replacementCard('reStart');
+               }
+               else if (type === 'return') {
+                   this.gameControl.createStartGame();
+                   this.gameControl.otherVanish();
+               }
            }), 500);
        }
-       vanish() {
-           let Lrotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
-           let Arotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
-           let Rrotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
-           let time = 600;
-           Laya.Tween.to(this.logo, { y: 1500, rotation: Lrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+       vanish(type) {
+           let Lrotation = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
+           let Arotation = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
+           let Rrotation = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
+           let time = 800;
+           let targetY = 1800;
+           Laya.Tween.to(this.logo, { y: targetY, rotation: Lrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
            }), 0);
-           Laya.Tween.to(this.btn_again, { y: 1500, rotation: Arotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
-               this.homing();
+           Laya.Tween.to(this.btn_again, { y: targetY, rotation: Arotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
            }), 150);
-           Laya.Tween.to(this.btn_return, { y: 1500, rotation: Rrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+           Laya.Tween.to(this.btn_return, { y: targetY, rotation: Rrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
                this.self.removeSelf();
-               this.gameControl.replacementCard('reStart');
+               this.homing(type);
            }), 300);
        }
        clicksOnBtn() {
@@ -446,9 +485,11 @@
            event.currentTarget.scale(1, 1);
            this.clicksOffBtn();
            if (event.currentTarget.name === 'btn_again') {
-               this.startAgain();
+               this.vanish('again');
            }
-           else if (event.currentTarget.name === 'btn_return') ;
+           else if (event.currentTarget.name === 'btn_return') {
+               this.vanish('return');
+           }
        }
        out(event) {
            event.currentTarget.scale(1, 1);
@@ -479,20 +520,27 @@
            this.self = this.owner;
            this.self['GameOVer'] = this;
            this.gameControl = this.self.scene['Gamecontrol'];
+           this.levelsNode = this.gameControl.levelsNode;
+           this.indicateCard = this.gameControl.indicateCard;
+           this.timeCard = this.gameControl.timeCard;
+           this.line = this.gameControl.line;
            this.startSwitch = false;
            this.startChange = 'appear';
+           this.gameControl.adaptiveOther(this.self);
            this.appaer();
        }
        appaer() {
+           let firstY = 1800;
            this.logo.y = 1500;
-           this.logo.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
-           this.btn_start.y = 1500;
+           this.btn_start.y = firstY;
            this.btn_start.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
-           this.btn_ranking.y = 1500;
+           this.btn_ranking.y = firstY;
            this.btn_ranking.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
-           this.btn_share.y = 1500;
+           this.btn_share.y = firstY;
            this.btn_share.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
-           let time = 300;
+           this.anti_addiction.y = firstY;
+           this.anti_addiction.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
+           let time = 400;
            let delayed = 80;
            Laya.Tween.to(this.logo, { y: 439, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
            }), 0);
@@ -501,8 +549,32 @@
            Laya.Tween.to(this.btn_ranking, { y: 812, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
            }), 2 * delayed);
            Laya.Tween.to(this.btn_share, { y: 812, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
-               this.startSwitch = true;
            }), 3 * delayed);
+           Laya.Tween.to(this.anti_addiction, { y: Laya.stage.height * 9 / 10, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
+               this.startSwitch = true;
+               this.clicksOnBtn();
+           }), 4 * delayed);
+       }
+       startVanish() {
+           let Lrotation = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
+           let Srotation = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
+           let Rrotation = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
+           let time = 800;
+           let delayed = 150;
+           let targetY = 1800;
+           Laya.Tween.to(this.logo, { y: targetY, rotation: Lrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+           }), 0);
+           Laya.Tween.to(this.btn_start, { y: targetY, rotation: Srotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+           }), delayed);
+           Laya.Tween.to(this.btn_ranking, { y: targetY, rotation: Rrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+           }), delayed * 2);
+           Laya.Tween.to(this.btn_share, { y: 1500, rotation: Rrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+           }), delayed * 3);
+           Laya.Tween.to(this.anti_addiction, { y: 1500, rotation: Rrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+               this.self.removeSelf();
+               this.gameControl.otherAppear();
+               this.gameControl.replacementCard('start');
+           }), delayed * 4);
        }
        onUpdate() {
            if (this.startSwitch) {
@@ -521,6 +593,52 @@
                    }
                }
            }
+       }
+       clicksOnBtn() {
+           this.btn_start.on(Laya.Event.MOUSE_DOWN, this, this.down);
+           this.btn_start.on(Laya.Event.MOUSE_MOVE, this, this.move);
+           this.btn_start.on(Laya.Event.MOUSE_UP, this, this.up);
+           this.btn_start.on(Laya.Event.MOUSE_OUT, this, this.out);
+           this.btn_ranking.on(Laya.Event.MOUSE_DOWN, this, this.down);
+           this.btn_ranking.on(Laya.Event.MOUSE_MOVE, this, this.move);
+           this.btn_ranking.on(Laya.Event.MOUSE_UP, this, this.up);
+           this.btn_ranking.on(Laya.Event.MOUSE_OUT, this, this.out);
+           this.btn_share.on(Laya.Event.MOUSE_DOWN, this, this.down);
+           this.btn_share.on(Laya.Event.MOUSE_MOVE, this, this.move);
+           this.btn_share.on(Laya.Event.MOUSE_UP, this, this.up);
+           this.btn_share.on(Laya.Event.MOUSE_OUT, this, this.out);
+       }
+       clicksOffBtn() {
+           this.btn_start.off(Laya.Event.MOUSE_DOWN, this, this.down);
+           this.btn_start.off(Laya.Event.MOUSE_MOVE, this, this.move);
+           this.btn_start.off(Laya.Event.MOUSE_UP, this, this.up);
+           this.btn_start.off(Laya.Event.MOUSE_OUT, this, this.out);
+           this.btn_ranking.off(Laya.Event.MOUSE_DOWN, this, this.down);
+           this.btn_ranking.off(Laya.Event.MOUSE_MOVE, this, this.move);
+           this.btn_ranking.off(Laya.Event.MOUSE_UP, this, this.up);
+           this.btn_ranking.off(Laya.Event.MOUSE_OUT, this, this.out);
+           this.btn_share.off(Laya.Event.MOUSE_DOWN, this, this.down);
+           this.btn_share.off(Laya.Event.MOUSE_MOVE, this, this.move);
+           this.btn_share.off(Laya.Event.MOUSE_UP, this, this.up);
+           this.btn_share.off(Laya.Event.MOUSE_OUT, this, this.out);
+       }
+       down(event) {
+           event.currentTarget.scale(1.1, 1.1);
+       }
+       move(event) {
+           event.currentTarget.scale(1, 1);
+       }
+       up(event) {
+           event.currentTarget.scale(1, 1);
+           this.clicksOffBtn();
+           if (event.currentTarget.name === 'btn_start') {
+               this.startVanish();
+           }
+           else if (event.currentTarget.name === 'btn_ranking') ;
+           else if (event.currentTarget.name === 'btn_share') ;
+       }
+       out(event) {
+           event.currentTarget.scale(1, 1);
        }
        onDisable() {
        }

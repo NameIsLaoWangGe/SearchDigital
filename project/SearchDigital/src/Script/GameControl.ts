@@ -49,7 +49,6 @@ export default class GameControl extends Laya.Script {
         this.initGameScene();
         this.adaptiveRule();
         this.createStartGame();
-        // this.replacementCard('start');
     }
 
     /**初始化的一些变量*/
@@ -73,9 +72,17 @@ export default class GameControl extends Laya.Script {
         this.background.y = 0;
 
         this.line.y = stageHeight * 0.19;
+        this.line.alpha = 0;
+
         this.levelsNode.y = stageHeight * 0.12;
+        this.levelsNode.alpha = 0;
+
         this.indicateCard.y = stageHeight * 0.12;
+        this.indicateCard.alpha = 0;
+
         this.timeCard.y = stageHeight * 0.12;
+        this.timeCard.alpha = 0;
+
         this.cardParent.y = stageHeight * 0.22;
     }
 
@@ -83,15 +90,52 @@ export default class GameControl extends Laya.Script {
     createStartGame(): void {
         let startGame = Laya.Pool.getItemByCreateFun('startGame', this.startGame.create, this.startGame) as Laya.Sprite;
         this.self.addChild(startGame);
+    }
 
+    /**功能节点的消失动画*/
+    otherVanish(): void {
+        let time = 200;
+        let delayed = 150;
+        // 提示卡牌动画
+        Laya.Tween.to(this.levelsNode, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
+        }), 0);
+        // 提示卡牌动画
+        Laya.Tween.to(this.indicateCard, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
+        }), delayed);
+        // 时间节点动画
+        Laya.Tween.to(this.timeCard, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
+        }), delayed * 2);
+        // 分割线动画
+        Laya.Tween.to(this.line, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
+        }), delayed * 3);
+    }
+
+    /**功能节点的消失动画*/
+    otherAppear(): void {
+        let time = 200;
+        let delayed = 150;
+        // 提示卡牌动画
+        Laya.Tween.to(this.levelsNode, { alpha: 1 }, time, null, Laya.Handler.create(this, function () {
+        }), 0);
+        // 提示卡牌动画
+        Laya.Tween.to(this.indicateCard, { alpha: 1 }, time, null, Laya.Handler.create(this, function () {
+        }), delayed);
+        // 时间节点动画
+        Laya.Tween.to(this.timeCard, { alpha: 1 }, time, null, Laya.Handler.create(this, function () {
+        }), delayed * 2);
+        // 分割线动画
+        Laya.Tween.to(this.line, { alpha: 1 }, time, null, Laya.Handler.create(this, function () {
+        }), delayed * 3);
     }
 
     /**牌局开始
-     * @param type 是重新开始还是第一次开始
+     * 一种情况是重新开始
+     * 一种情况是开始游戏界面进入的开始
+     * @param type 
     */
     replacementCard(type): void {
         if (type === 'start') {
-
+            this.levels = 0;
         } else if (type === 'reStart') {
             this.levels = 0;
         }
@@ -239,6 +283,14 @@ export default class GameControl extends Laya.Script {
         this.self.addChild(gameOVer);
     }
 
+    /**其他界面的自适应规则*/
+    adaptiveOther(self): void {
+        self.width = 750;
+        self.height = Laya.stage.height;
+        self.pivotX = this.self.width / 2;
+        self.pivotY = this.self.height / 2;
+        self.pos(375, Laya.stage.height / 2);
+    }
 
     onUpdate(): void {
         // 倒计时
