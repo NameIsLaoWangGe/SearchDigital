@@ -446,11 +446,11 @@
            let Rrotation = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
            let time = 800;
            let targetY = 1800;
-           Laya.Tween.to(this.logo, { y: targetY, rotation: Lrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+           Laya.Tween.to(this.btn_return, { y: targetY, rotation: Lrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
            }), 0);
            Laya.Tween.to(this.btn_again, { y: targetY, rotation: Arotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
            }), 150);
-           Laya.Tween.to(this.btn_return, { y: targetY, rotation: Rrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+           Laya.Tween.to(this.logo, { y: targetY, rotation: Rrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
                this.self.removeSelf();
                this.homing(type);
            }), 300);

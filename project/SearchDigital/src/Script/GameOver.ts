@@ -112,7 +112,7 @@ export default class GameOver extends Laya.Script {
             Laya.Tween.to(this.levelsNode, { x: targetX, y: targetY, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
             }), 0);
         }), 0);
-        
+
         this.levelsNode['LevelsNode'].levelsNodeAni('common', 100);//这个是旋转动画
 
         // 提示卡牌动画
@@ -145,14 +145,14 @@ export default class GameOver extends Laya.Script {
         let time = 800;
         let targetY = 1800;
         // logo 动画
-        Laya.Tween.to(this.logo, { y: targetY, rotation: Lrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+        Laya.Tween.to(this.btn_return, { y: targetY, rotation: Lrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
         }), 0);
         // 返回按钮动画
         Laya.Tween.to(this.btn_again, { y: targetY, rotation: Arotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
 
         }), 150);
         // 重来按钮动画
-        Laya.Tween.to(this.btn_return, { y: targetY, rotation: Rrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+        Laya.Tween.to(this.logo, { y: targetY, rotation: Rrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
             this.self.removeSelf();
             this.homing(type);
 
