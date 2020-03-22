@@ -27,6 +27,9 @@ export default class GameControl extends Laya.Script {
     /** @prop {name:line, tips:"分割线", type:Node}*/
     public line: Laya.Sprite;
 
+    /** @prop {name:startGame, tips:"游戏开始预制体", type:Prefab}*/
+    public startGame: Laya.Prefab;
+
     /** @prop {name:gameOVer, tips:"游戏结束预制体", type:Prefab}*/
     public gameOVer: Laya.Prefab;
 
@@ -44,8 +47,9 @@ export default class GameControl extends Laya.Script {
 
     onEnable(): void {
         this.initGameScene();
-        this.replacementCard('start');
         this.adaptiveRule();
+        this.createStartGame();
+        // this.replacementCard('start');
     }
 
     /**初始化的一些变量*/
@@ -73,6 +77,13 @@ export default class GameControl extends Laya.Script {
         this.indicateCard.y = stageHeight * 0.12;
         this.timeCard.y = stageHeight * 0.12;
         this.cardParent.y = stageHeight * 0.22;
+    }
+
+    /**创建游戏开始界面*/
+    createStartGame(): void {
+        let startGame = Laya.Pool.getItemByCreateFun('startGame', this.startGame.create, this.startGame) as Laya.Sprite;
+        this.self.addChild(startGame);
+
     }
 
     /**牌局开始
@@ -222,15 +233,12 @@ export default class GameControl extends Laya.Script {
         return numString;
     }
 
-
     /**创建结算界面*/
     createGameOver(): void {
-        let gameOVer = Laya.Pool.getItemByCreateFun('speakBox', this.gameOVer.create, this.gameOVer) as Laya.Sprite;
+        let gameOVer = Laya.Pool.getItemByCreateFun('gameOVer', this.gameOVer.create, this.gameOVer) as Laya.Sprite;
         this.self.addChild(gameOVer);
-
     }
 
-    /**创建游戏开始界面*/
 
     onUpdate(): void {
         // 倒计时

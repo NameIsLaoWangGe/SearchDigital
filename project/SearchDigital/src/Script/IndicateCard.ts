@@ -11,7 +11,6 @@ export default class IndicateCard extends Laya.Script {
     onEnable(): void {
         this.self = this.owner as Laya.Sprite;
         this.gameControl = this.self.scene['Gamecontrol'];
-
         this.self['IndicateCard'] = this;
     }
 
@@ -19,10 +18,8 @@ export default class IndicateCard extends Laya.Script {
     indicateNodeAin(): void {
         let time = 120;
         Laya.Tween.to(this.self, { scaleY: 0 }, time, null, Laya.Handler.create(this, function () {
-            this.indicateNum.alpha = 0;
+            this.indicateNumReset();
             Laya.Tween.to(this.self, { scaleY: 1 }, time, null, Laya.Handler.create(this, function () {
-                this.indicateNum.alpha = 1;
-                this.indicateNumReset();
                 this.gameControl.cardCollection();
             }), 0);
         }), 0);
@@ -55,7 +52,7 @@ export default class IndicateCard extends Laya.Script {
         }))
     }
 
-    /**上下点头动画*/
+    /**上下摇摆动画*/
     rightAni(): void {
         Laya.Tween.to(this.self, { y: this.self.y + 10 }, 50, null, Laya.Handler.create(this, function () {
             Laya.Tween.to(this.self, { y: this.self.y - 20 }, 50, null, Laya.Handler.create(this, function () {

@@ -4,6 +4,7 @@ import GameControl from "./Script/GameControl"
 import LevelsNode from "./Script/LevelsNode"
 import DigitalCard from "./Script/DigitalCard"
 import GameOver from "./Script/GameOver"
+import StartGame from "./Script/StartGame"
 /*
 * 游戏初始化配置;
 */
@@ -28,6 +29,7 @@ export default class GameConfig{
         reg("Script/LevelsNode.ts",LevelsNode);
         reg("Script/DigitalCard.ts",DigitalCard);
         reg("Script/GameOver.ts",GameOver);
+        reg("Script/StartGame.ts",StartGame);
     }
 }
 GameConfig.init();

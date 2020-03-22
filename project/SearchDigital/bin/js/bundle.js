@@ -11,10 +11,8 @@
        indicateNodeAin() {
            let time = 120;
            Laya.Tween.to(this.self, { scaleY: 0 }, time, null, Laya.Handler.create(this, function () {
-               this.indicateNum.alpha = 0;
+               this.indicateNumReset();
                Laya.Tween.to(this.self, { scaleY: 1 }, time, null, Laya.Handler.create(this, function () {
-                   this.indicateNum.alpha = 1;
-                   this.indicateNumReset();
                    this.gameControl.cardCollection();
                }), 0);
            }), 0);
@@ -56,8 +54,8 @@
        constructor() { super(); }
        onEnable() {
            this.initGameScene();
-           this.replacementCard('start');
            this.adaptiveRule();
+           this.createStartGame();
        }
        initGameScene() {
            this.self = this.owner;
@@ -79,6 +77,10 @@
            this.indicateCard.y = stageHeight * 0.12;
            this.timeCard.y = stageHeight * 0.12;
            this.cardParent.y = stageHeight * 0.22;
+       }
+       createStartGame() {
+           let startGame = Laya.Pool.getItemByCreateFun('startGame', this.startGame.create, this.startGame);
+           this.self.addChild(startGame);
        }
        replacementCard(type) {
            if (type === 'start') ;
@@ -198,7 +200,7 @@
            return numString;
        }
        createGameOver() {
-           let gameOVer = Laya.Pool.getItemByCreateFun('speakBox', this.gameOVer.create, this.gameOVer);
+           let gameOVer = Laya.Pool.getItemByCreateFun('gameOVer', this.gameOVer.create, this.gameOVer);
            this.self.addChild(gameOVer);
        }
        onUpdate() {
@@ -342,7 +344,7 @@
            this.self.pivotX = this.self.width / 2;
            this.self.pivotY = this.self.height / 2;
            this.self.pos(375, Laya.stage.height / 2);
-           this.logosSwitch = false;
+           this.logoSwitch = false;
            this.logoChange = 'appear';
            this.appaer();
        }
@@ -357,9 +359,9 @@
            Laya.Tween.to(this.logo, { y: 644, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
                this.levelsGameOver();
            }), 0);
-           Laya.Tween.to(this.btn_again, { y: 818, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
+           Laya.Tween.to(this.btn_again, { y: 790, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
            }), 150);
-           Laya.Tween.to(this.btn_return, { y: 822, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
+           Laya.Tween.to(this.btn_return, { y: 790, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
            }), 300);
        }
        levelsGameOver() {
@@ -369,7 +371,7 @@
            let Pre = 1 / 2;
            Laya.Tween.to(this.levelsNode, { x: targetX * Pre, y: targetY * Pre, rotation: 45 }, time, null, Laya.Handler.create(this, function () {
                Laya.Tween.to(this.levelsNode, { x: targetX, y: targetY, rotation: 0, }, time, null, Laya.Handler.create(this, function () {
-                   this.logosSwitch = true;
+                   this.logoSwitch = true;
                }), 0);
            }), 30);
            this.levelsNode['LevelsNode'].levelsNodeAni('common', 100);
@@ -452,7 +454,7 @@
            event.currentTarget.scale(1, 1);
        }
        onUpdate() {
-           if (this.logosSwitch) {
+           if (this.logoSwitch) {
                if (this.logoChange === 'appear') {
                    this.logo.alpha -= 0.01;
                    if (this.logo.alpha < 0.3) {
@@ -471,6 +473,59 @@
        }
    }
 
+   class StartGame extends Laya.Script {
+       constructor() { super(); }
+       onEnable() {
+           this.self = this.owner;
+           this.self['GameOVer'] = this;
+           this.gameControl = this.self.scene['Gamecontrol'];
+           this.startSwitch = false;
+           this.startChange = 'appear';
+           this.appaer();
+       }
+       appaer() {
+           this.logo.y = 1500;
+           this.logo.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
+           this.btn_start.y = 1500;
+           this.btn_start.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
+           this.btn_ranking.y = 1500;
+           this.btn_ranking.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
+           this.btn_share.y = 1500;
+           this.btn_share.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
+           let time = 300;
+           let delayed = 80;
+           Laya.Tween.to(this.logo, { y: 439, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
+           }), 0);
+           Laya.Tween.to(this.btn_start, { y: 620, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
+           }), delayed);
+           Laya.Tween.to(this.btn_ranking, { y: 812, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
+           }), 2 * delayed);
+           Laya.Tween.to(this.btn_share, { y: 812, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
+               this.startSwitch = true;
+           }), 3 * delayed);
+       }
+       onUpdate() {
+           if (this.startSwitch) {
+               if (this.startChange === 'appear') {
+                   this.btn_start.scaleX += 0.003;
+                   this.btn_start.scaleY += 0.003;
+                   if (this.btn_start.scaleX > 1.1) {
+                       this.startChange = 'vanish';
+                   }
+               }
+               else if (this.startChange === 'vanish') {
+                   this.btn_start.scaleX -= 0.003;
+                   this.btn_start.scaleY -= 0.003;
+                   if (this.btn_start.scaleX < 1) {
+                       this.startChange = 'appear';
+                   }
+               }
+           }
+       }
+       onDisable() {
+       }
+   }
+
    class GameConfig {
        constructor() { }
        static init() {
@@ -480,6 +535,7 @@
            reg("Script/LevelsNode.ts", LevelsNode);
            reg("Script/DigitalCard.ts", DigitalCard);
            reg("Script/GameOver.ts", GameOver);
+           reg("Script/StartGame.ts", StartGame);
        }
    }
    GameConfig.width = 750;

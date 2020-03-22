@@ -22,7 +22,7 @@ export default class GameOver extends Laya.Script {
     private line: Laya.Sprite;
 
     /**logo的渐隐动画开关*/
-    private logosSwitch: boolean;
+    private logoSwitch: boolean;
     private logoChange: string;
 
     constructor() { super(); }
@@ -42,7 +42,7 @@ export default class GameOver extends Laya.Script {
         this.self.pivotY = this.self.height / 2;
         this.self.pos(375, Laya.stage.height / 2);
 
-        this.logosSwitch = false;
+        this.logoSwitch = false;
         this.logoChange = 'appear';
 
         this.appaer();
@@ -64,10 +64,10 @@ export default class GameOver extends Laya.Script {
             this.levelsGameOver();
         }), 0);
         // 返回按钮动画
-        Laya.Tween.to(this.btn_again, { y: 818, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
+        Laya.Tween.to(this.btn_again, { y: 790, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
         }), 150);
         // 重来按钮动画
-        Laya.Tween.to(this.btn_return, { y: 822, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
+        Laya.Tween.to(this.btn_return, { y: 790, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
         }), 300);
     }
 
@@ -80,7 +80,7 @@ export default class GameOver extends Laya.Script {
         let Pre = 1 / 2;//这个是路线上的一个点站到整体的百分比
         Laya.Tween.to(this.levelsNode, { x: targetX * Pre, y: targetY * Pre, rotation: 45 }, time, null, Laya.Handler.create(this, function () {
             Laya.Tween.to(this.levelsNode, { x: targetX, y: targetY, rotation: 0, }, time, null, Laya.Handler.create(this, function () {
-                this.logosSwitch = true;
+                this.logoSwitch = true;
             }), 0);
         }), 30);
 
@@ -207,7 +207,7 @@ export default class GameOver extends Laya.Script {
     }
 
     onUpdate(): void {
-        if (this.logosSwitch) {
+        if (this.logoSwitch) {
             if (this.logoChange === 'appear') {
                 this.logo.alpha -= 0.01;
                 if (this.logo.alpha < 0.3) {
