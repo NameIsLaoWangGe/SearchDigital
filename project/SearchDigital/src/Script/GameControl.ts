@@ -44,7 +44,8 @@ export default class GameControl extends Laya.Script {
 
     onEnable(): void {
         this.initGameScene();
-        this.replacementCard();
+        this.replacementCard('start');
+        // this.adaptiveRule();
     }
 
     /**初始化的一些变量*/
@@ -70,11 +71,23 @@ export default class GameControl extends Laya.Script {
         this.cardParent.y = 0.22;
     }
 
-    /**牌局开始*/
-    replacementCard(): void {
+    /**牌局开始
+     * @param type 是重新开始还是第一次开始
+    */
+    replacementCard(type): void {
+        if (type === 'start') {
+
+        } else if (type === 'reStart') {
+            this.levels = 0;
+        }
         this.levels++;
         this.levelsNodeAni();
         this.timeNum.value = '3s';
+    }
+
+    /**重新开始*/
+    restart(): void {
+
     }
 
     /**等级动画*/

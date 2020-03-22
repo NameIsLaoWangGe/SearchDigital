@@ -1,8 +1,0 @@
-{
-  "code": "import GameControl from \"./Script/GameControl\";\r\nimport DigitalCard from \"./Script/DigitalCard\";\r\nimport GameOver from \"./Script/GameOver\";\r\nexport default class GameConfig {\r\n    constructor() { }\r\n    static init() {\r\n        var reg = Laya.ClassUtils.regClass;\r\n        reg(\"Script/GameControl.ts\", GameControl);\r\n        reg(\"Script/DigitalCard.ts\", DigitalCard);\r\n        reg(\"Script/GameOver.ts\", GameOver);\r\n    }\r\n}\r\nGameConfig.width = 750;\r\nGameConfig.height = 1334;\r\nGameConfig.scaleMode = \"fixedwidth\";\r\nGameConfig.screenMode = \"none\";\r\nGameConfig.alignV = \"top\";\r\nGameConfig.alignH = \"left\";\r\nGameConfig.startScene = \"Scene/MainScene.scene\";\r\nGameConfig.sceneRoot = \"\";\r\nGameConfig.debug = false;\r\nGameConfig.stat = false;\r\nGameConfig.physicsDebug = false;\r\nGameConfig.exportSceneToJson = true;\r\nGameConfig.init();\r\n",
-  "references": [
-    "F:/Work/Game/SearchDigital/project/SearchDigital/src/Script/GameControl.ts",
-    "F:/Work/Game/SearchDigital/project/SearchDigital/src/Script/DigitalCard.ts",
-    "F:/Work/Game/SearchDigital/project/SearchDigital/src/Script/GameOver.ts"
-  ]
-}

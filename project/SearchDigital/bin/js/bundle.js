@@ -5,7 +5,7 @@
         constructor() { super(); }
         onEnable() {
             this.initGameScene();
-            this.replacementCard();
+            this.replacementCard('start');
         }
         initGameScene() {
             this.self = this.owner;
@@ -26,10 +26,16 @@
             this.timeCard.y = 0.12;
             this.cardParent.y = 0.22;
         }
-        replacementCard() {
+        replacementCard(type) {
+            if (type === 'start') ;
+            else if (type === 'reStart') {
+                this.levels = 0;
+            }
             this.levels++;
             this.levelsNodeAni();
             this.timeNum.value = '3s';
+        }
+        restart() {
         }
         levelsNodeAni() {
             let time = 120;
@@ -289,11 +295,11 @@
             }), 300);
         }
         levelsGameOver() {
-            let time = 250;
+            let time = 200;
             let targetX = Laya.stage.width / 2;
             let targetY = this.logo.y + (this.self.y - this.self.height / 2) - 150;
-            let yPre = 1 / 2;
-            Laya.Tween.to(this.levelsNode, { x: targetX * yPre, y: targetY * yPre, rotation: 45 }, time, null, Laya.Handler.create(this, function () {
+            let Pre = 1 / 2;
+            Laya.Tween.to(this.levelsNode, { x: targetX * Pre, y: targetY * Pre, rotation: 45 }, time, null, Laya.Handler.create(this, function () {
                 Laya.Tween.to(this.levelsNode, { x: targetX, y: targetY, rotation: 0, }, time, null, Laya.Handler.create(this, function () {
                     this.clicksBtn();
                     this.logosSwitch = true;
@@ -308,6 +314,42 @@
             Laya.Tween.to(this.line, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
                 this.clicksBtn();
             }), 0);
+        }
+        startAgain() {
+            this.vanish();
+        }
+        homing() {
+            let time = 300;
+            let targetX = 108;
+            let targetY = this.indicateCard.y;
+            Laya.Tween.to(this.levelsNode, { x: this.levelsNode.x - targetX - 20, y: this.levelsNode.y - targetY, rotation: -45 }, time, null, Laya.Handler.create(this, function () {
+                Laya.Tween.to(this.levelsNode, { x: targetX, y: targetY, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
+                }), 0);
+            }), 0);
+            Laya.Tween.to(this.indicateCard, { alpha: 1 }, time * 2, null, Laya.Handler.create(this, function () {
+                this.clicksBtn();
+            }), 0);
+            Laya.Tween.to(this.timeCard, { alpha: 1 }, time * 2, null, Laya.Handler.create(this, function () {
+                this.clicksBtn();
+            }), 30);
+            Laya.Tween.to(this.line, { alpha: 1 }, time, null, Laya.Handler.create(this, function () {
+                this.clicksBtn();
+            }), 60);
+        }
+        vanish() {
+            let Lrotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
+            let Arotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
+            let Rrotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
+            let time = 600;
+            Laya.Tween.to(this.logo, { y: 1500, rotation: Lrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+            }), 0);
+            Laya.Tween.to(this.btn_again, { y: 1500, rotation: Arotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+                this.homing();
+            }), 150);
+            Laya.Tween.to(this.btn_return, { y: 1500, rotation: Rrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+                this.self.removeSelf();
+                this.gameControl.replacementCard('reStart');
+            }), 300);
         }
         clicksBtn() {
             this.btn_again.on(Laya.Event.MOUSE_DOWN, this, this.down);
@@ -327,7 +369,9 @@
         }
         up(event) {
             event.currentTarget.scale(1, 1);
-            if (event.currentTarget.name === 'btn_again') ;
+            if (event.currentTarget.name === 'btn_again') {
+                this.startAgain();
+            }
             else if (event.currentTarget.name === 'btn_return') ;
         }
         out(event) {
@@ -371,7 +415,7 @@
     GameConfig.startScene = "Scene/MainScene.scene";
     GameConfig.sceneRoot = "";
     GameConfig.debug = false;
-    GameConfig.stat = false;
+    GameConfig.stat = true;
     GameConfig.physicsDebug = false;
     GameConfig.exportSceneToJson = true;
     GameConfig.init();

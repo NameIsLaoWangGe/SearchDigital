@@ -73,12 +73,12 @@ export default class GameOver extends Laya.Script {
 
     /**关卡卡牌移动到中间做为最终分数*/
     levelsGameOver(): void {
-        let time = 250;
+        let time = 200;
         // 关卡节点动画
         let targetX = Laya.stage.width / 2;
         let targetY = this.logo.y + (this.self.y - this.self.height / 2) - 150;//y在logo的世界坐标-100的位置
-        let yPre = 1 / 2;//这个是路线上的一个点站到整体的百分比
-        Laya.Tween.to(this.levelsNode, { x: targetX * yPre, y: targetY * yPre, rotation: 45 }, time, null, Laya.Handler.create(this, function () {
+        let Pre = 1 / 2;//这个是路线上的一个点站到整体的百分比
+        Laya.Tween.to(this.levelsNode, { x: targetX * Pre, y: targetY * Pre, rotation: 45 }, time, null, Laya.Handler.create(this, function () {
             Laya.Tween.to(this.levelsNode, { x: targetX, y: targetY, rotation: 0, }, time, null, Laya.Handler.create(this, function () {
                 this.clicksBtn();
                 this.logosSwitch = true;
@@ -102,10 +102,62 @@ export default class GameOver extends Laya.Script {
 
     }
 
-    /**重来*/
+    /**重来
+     * 先把元素归为原位
+    */
     startAgain(): void {
-
+        this.vanish();
     }
+
+    /**关卡卡牌移动到中间做为最终分数*/
+    homing(): void {
+        let time = 300;
+        // 关卡节点动画
+        let targetX = 108;//排好的位置不变
+        let targetY = this.indicateCard.y;//y轴和时间、提示卡牌位置一样
+        let Pre = 1 / 2;//这个是路线上的一个点站到整体的百分比\
+        Laya.Tween.to(this.levelsNode, { x: this.levelsNode.x - targetX - 20, y: this.levelsNode.y - targetY, rotation: -45 }, time, null, Laya.Handler.create(this, function () {
+            Laya.Tween.to(this.levelsNode, { x: targetX, y: targetY, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
+
+            }), 0);
+        }), 0);
+
+        // 提示卡牌动画
+        Laya.Tween.to(this.indicateCard, { alpha: 1 }, time * 2, null, Laya.Handler.create(this, function () {
+            this.clicksBtn();
+        }), 0);
+
+        // 时间节点动画
+        Laya.Tween.to(this.timeCard, { alpha: 1 }, time * 2, null, Laya.Handler.create(this, function () {
+            this.clicksBtn();
+        }), 30);
+
+        // 分割线动画
+        Laya.Tween.to(this.line, { alpha: 1 }, time, null, Laya.Handler.create(this, function () {
+            this.clicksBtn();
+        }), 60);
+    }
+
+    /**出现动画*/
+    vanish(): void {
+        let Lrotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
+        let Arotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
+        let Rrotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
+        let time = 600;
+        // logo 动画
+        Laya.Tween.to(this.logo, { y: 1500, rotation: Lrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+        }), 0);
+        // 返回按钮动画
+        Laya.Tween.to(this.btn_again, { y: 1500, rotation: Arotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+            this.homing();
+        }), 150);
+        // 重来按钮动画
+        Laya.Tween.to(this.btn_return, { y: 1500, rotation: Rrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+            this.self.removeSelf();
+            this.gameControl.replacementCard('reStart');
+        }), 300);
+    }
+
 
     /**两个按钮的点击事件*/
     clicksBtn(): void {
@@ -134,7 +186,7 @@ export default class GameOver extends Laya.Script {
     up(event): void {
         event.currentTarget.scale(1, 1);
         if (event.currentTarget.name === 'btn_again') {
-
+            this.startAgain();
         } else if (event.currentTarget.name === 'btn_return') {
 
         }
