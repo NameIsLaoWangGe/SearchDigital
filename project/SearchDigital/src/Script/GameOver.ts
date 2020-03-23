@@ -54,17 +54,21 @@ export default class GameOver extends Laya.Script {
 
         this.btn_return.y = firstY;
         this.btn_return.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
+
+        this.commonAppear(this.logo, 0, 644);
+        this.commonAppear(this.btn_again, 1, 790);
+        this.commonAppear(this.btn_return, 2, 790);
+    }
+
+    /**通过出现动画*/
+    commonAppear(node, number, targetY): void {
         let time = 500;
-        // logo 动画
-        Laya.Tween.to(this.logo, { y: 644, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
-            this.levelsGameOver();
-        }), 0);
-        // 返回按钮动画
-        Laya.Tween.to(this.btn_again, { y: 790, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
-        }), 150);
-        // 重来按钮动画
-        Laya.Tween.to(this.btn_return, { y: 790, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
-        }), 300);
+        let delayed = 150
+        Laya.Tween.to(node, { y: targetY, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
+            if (number === 0) {
+                this.levelsGameOver();
+            }
+        }), number * delayed);
     }
 
     /**关卡卡牌移动到中间做为最终分数*/
@@ -142,21 +146,26 @@ export default class GameOver extends Laya.Script {
         let Lrotation = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
         let Arotation = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
         let Rrotation = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
+
+        this.commonVanish(this.btn_again, 0, Math.floor(Math.random() * 2) === 1 ? 30 : -30);
+        this.commonVanish(this.btn_return, 1, Math.floor(Math.random() * 2) === 1 ? 30 : -30);
+
+        // 重来按钮动画
         let time = 800;
         let targetY = 1800;
-        // logo 动画
-        Laya.Tween.to(this.btn_return, { y: targetY, rotation: Lrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
-        }), 0);
-        // 返回按钮动画
-        Laya.Tween.to(this.btn_again, { y: targetY, rotation: Arotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
-
-        }), 150);
-        // 重来按钮动画
         Laya.Tween.to(this.logo, { y: targetY, rotation: Rrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
             this.self.removeSelf();
             this.homing(type);
-
         }), 300);
+    }
+
+    /**通用消失动画*/
+    commonVanish(node, number, rotation): void {
+        let time = 800;
+        let delayed = 150;
+        // logo 动画
+        Laya.Tween.to(node, { y: 1800, rotation: rotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+        }), 0);
     }
 
     /**两个按钮的点击事件*/

@@ -112,16 +112,19 @@
        }
        replacementCard(type) {
            if (type === 'start') {
-               this.levels = 0;
+               this.timeNum.value = '60s';
+           }
+           else if (type === 'adv') {
+               this.timeNum.value = '70s';
            }
            else if (type === 'reStart') {
-               this.levels = 0;
+               this.timeNum.value = '60s';
            }
+           this.levels = 0;
            this.levels++;
            Laya.timer.once(200, this, function () {
                this.levelsNode['LevelsNode'].levelsNodeAni('nextLevel', 120);
            });
-           this.timeNum.value = '3s';
        }
        cardCollection() {
            let spacingY = 5;
@@ -389,14 +392,18 @@
            this.btn_again.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
            this.btn_return.y = firstY;
            this.btn_return.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
+           this.commonAppear(this.logo, 0, 644);
+           this.commonAppear(this.btn_again, 1, 790);
+           this.commonAppear(this.btn_return, 2, 790);
+       }
+       commonAppear(node, number, targetY) {
            let time = 500;
-           Laya.Tween.to(this.logo, { y: 644, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
-               this.levelsGameOver();
-           }), 0);
-           Laya.Tween.to(this.btn_again, { y: 790, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
-           }), 150);
-           Laya.Tween.to(this.btn_return, { y: 790, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
-           }), 300);
+           let delayed = 150;
+           Laya.Tween.to(node, { y: targetY, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
+               if (number === 0) {
+                   this.levelsGameOver();
+               }
+           }), number * delayed);
        }
        levelsGameOver() {
            let time = 200;
@@ -441,19 +448,20 @@
            }), 500);
        }
        vanish(type) {
-           let Lrotation = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
-           let Arotation = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
            let Rrotation = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
+           this.commonVanish(this.btn_again, 0, Math.floor(Math.random() * 2) === 1 ? 30 : -30);
+           this.commonVanish(this.btn_return, 1, Math.floor(Math.random() * 2) === 1 ? 30 : -30);
            let time = 800;
            let targetY = 1800;
-           Laya.Tween.to(this.btn_return, { y: targetY, rotation: Lrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
-           }), 0);
-           Laya.Tween.to(this.btn_again, { y: targetY, rotation: Arotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
-           }), 150);
            Laya.Tween.to(this.logo, { y: targetY, rotation: Rrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
                this.self.removeSelf();
                this.homing(type);
            }), 300);
+       }
+       commonVanish(node, number, rotation) {
+           let time = 800;
+           Laya.Tween.to(node, { y: 1800, rotation: rotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+           }), 0);
        }
        clicksOnBtn() {
            this.btn_again.on(Laya.Event.MOUSE_DOWN, this, this.down);
@@ -526,6 +534,7 @@
            this.line = this.gameControl.line;
            this.startSwitch = false;
            this.startChange = 'appear';
+           this.watchAds = false;
            this.gameControl.adaptiveOther(this.self);
            this.appaer();
        }
@@ -553,7 +562,7 @@
        }
        commonAppear(node, number, targetY) {
            let delayed = 80;
-           let time = 400;
+           let time = 600;
            Laya.Tween.to(node, { y: targetY, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
                if (number === 4) {
                    this.startSwitch = true;
@@ -577,33 +586,24 @@
                if (number === 4) {
                    this.self.removeSelf();
                    this.gameControl.otherAppear();
-                   this.gameControl.replacementCard('start');
+                   if (this.watchAds) {
+                       this.gameControl.replacementCard('adv');
+                   }
+                   else {
+                       this.gameControl.replacementCard('start');
+                   }
                }
            }), number * delayed);
-       }
-       onUpdate() {
-           if (this.startSwitch) {
-               if (this.startChange === 'appear') {
-                   this.btn_start.scaleX += 0.003;
-                   this.btn_start.scaleY += 0.003;
-                   if (this.btn_start.scaleX > 1.1) {
-                       this.startChange = 'vanish';
-                   }
-               }
-               else if (this.startChange === 'vanish') {
-                   this.btn_start.scaleX -= 0.003;
-                   this.btn_start.scaleY -= 0.003;
-                   if (this.btn_start.scaleX < 1) {
-                       this.startChange = 'appear';
-                   }
-               }
-           }
        }
        clicksOnBtn() {
            this.btn_start.on(Laya.Event.MOUSE_DOWN, this, this.down);
            this.btn_start.on(Laya.Event.MOUSE_MOVE, this, this.move);
            this.btn_start.on(Laya.Event.MOUSE_UP, this, this.up);
            this.btn_start.on(Laya.Event.MOUSE_OUT, this, this.out);
+           this.btn_adv.on(Laya.Event.MOUSE_DOWN, this, this.down);
+           this.btn_adv.on(Laya.Event.MOUSE_MOVE, this, this.move);
+           this.btn_adv.on(Laya.Event.MOUSE_UP, this, this.up);
+           this.btn_adv.on(Laya.Event.MOUSE_OUT, this, this.out);
            this.btn_ranking.on(Laya.Event.MOUSE_DOWN, this, this.down);
            this.btn_ranking.on(Laya.Event.MOUSE_MOVE, this, this.move);
            this.btn_ranking.on(Laya.Event.MOUSE_UP, this, this.up);
@@ -618,6 +618,10 @@
            this.btn_start.off(Laya.Event.MOUSE_MOVE, this, this.move);
            this.btn_start.off(Laya.Event.MOUSE_UP, this, this.up);
            this.btn_start.off(Laya.Event.MOUSE_OUT, this, this.out);
+           this.btn_adv.off(Laya.Event.MOUSE_DOWN, this, this.down);
+           this.btn_adv.off(Laya.Event.MOUSE_MOVE, this, this.move);
+           this.btn_adv.off(Laya.Event.MOUSE_UP, this, this.up);
+           this.btn_adv.off(Laya.Event.MOUSE_OUT, this, this.out);
            this.btn_ranking.off(Laya.Event.MOUSE_DOWN, this, this.down);
            this.btn_ranking.off(Laya.Event.MOUSE_MOVE, this, this.move);
            this.btn_ranking.off(Laya.Event.MOUSE_UP, this, this.up);
@@ -635,15 +639,58 @@
        }
        up(event) {
            event.currentTarget.scale(1, 1);
-           this.clicksOffBtn();
            if (event.currentTarget.name === 'btn_start') {
                this.startVanish();
+               this.clicksOffBtn();
+           }
+           else if (event.currentTarget.name === 'btn_adv') {
+               let videoAd = wx.createRewardedVideoAd({
+                   adUnitId: 'adunit-6de18c6de7b6d9ab'
+               });
+               this.videoAd = videoAd;
+               videoAd.load();
+               videoAd.onError(err => {
+                   console.log(err);
+               });
+               videoAd.onClose(res => {
+                   console.log(res);
+                   if (res && res.isEnded || res === undefined) {
+                       this.watchAds = true;
+                       console.log('视频看完了，时间增加10s');
+                   }
+                   else {
+                       this.watchAds = false;
+                       console.log('视频没有看完，没有奖励');
+                   }
+               });
            }
            else if (event.currentTarget.name === 'btn_ranking') ;
            else if (event.currentTarget.name === 'btn_share') ;
        }
        out(event) {
            event.currentTarget.scale(1, 1);
+       }
+       onUpdate() {
+           if (this.startSwitch) {
+               if (this.startChange === 'appear') {
+                   this.btn_start.scaleX += 0.003;
+                   this.btn_start.scaleY += 0.003;
+                   this.btn_adv.scaleX -= 0.003;
+                   this.btn_adv.scaleY -= 0.003;
+                   if (this.btn_start.scaleX > 1.1) {
+                       this.startChange = 'vanish';
+                   }
+               }
+               else if (this.startChange === 'vanish') {
+                   this.btn_start.scaleX -= 0.003;
+                   this.btn_start.scaleY -= 0.003;
+                   this.btn_adv.scaleX += 0.003;
+                   this.btn_adv.scaleY += 0.003;
+                   if (this.btn_start.scaleX < 1) {
+                       this.startChange = 'appear';
+                   }
+               }
+           }
        }
        onDisable() {
        }
@@ -670,7 +717,7 @@
    GameConfig.startScene = "Scene/MainScene.scene";
    GameConfig.sceneRoot = "";
    GameConfig.debug = false;
-   GameConfig.stat = true;
+   GameConfig.stat = false;
    GameConfig.physicsDebug = false;
    GameConfig.exportSceneToJson = true;
    GameConfig.init();

@@ -131,19 +131,22 @@ export default class GameControl extends Laya.Script {
     /**牌局开始
      * 一种情况是重新开始
      * 一种情况是开始游戏界面进入的开始
+     * 一种是看完广告开始游戏
      * @param type 
     */
     replacementCard(type): void {
         if (type === 'start') {
-            this.levels = 0;
+            this.timeNum.value = '60s';
+        } else if (type === 'adv') {
+            this.timeNum.value = '70s';
         } else if (type === 'reStart') {
-            this.levels = 0;
+            this.timeNum.value = '60s';
         }
+        this.levels = 0;
         this.levels++;
         Laya.timer.once(200, this, function () {
             this.levelsNode['LevelsNode'].levelsNodeAni('nextLevel', 120);
         })
-        this.timeNum.value = '3s';
     }
 
     /**构建数字牌集合

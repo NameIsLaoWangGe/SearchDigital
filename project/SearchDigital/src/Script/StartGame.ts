@@ -34,6 +34,10 @@ export default class StartGame extends Laya.Script {
     /**开始游戏按别扭的渐隐动画开关*/
     private startSwitch: boolean;
     private startChange: string;
+    /**保存视频实例*/
+    private videoAd;
+    /**是否观看了视频*/
+    private watchAds: boolean;
 
     constructor() { super(); }
 
@@ -48,6 +52,7 @@ export default class StartGame extends Laya.Script {
 
         this.startSwitch = false;
         this.startChange = 'appear';
+        this.watchAds = false;
 
         this.gameControl.adaptiveOther(this.self);
 
@@ -88,7 +93,7 @@ export default class StartGame extends Laya.Script {
     /**通用出现动画*/
     commonAppear(node, number, targetY): void {
         let delayed = 80;
-        let time = 400;
+        let time = 600;
         Laya.Tween.to(node, { y: targetY, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
             if (number === 4) {
                 this.startSwitch = true;
@@ -97,7 +102,8 @@ export default class StartGame extends Laya.Script {
         }), number * delayed);
     }
 
-    /**消失动画*/
+    /**消失动画
+    */
     startVanish(): void {
         Laya.Tween.to(this.anti_addiction, { alpha: 0 }, 300, null, Laya.Handler.create(this, function () {
         }));
@@ -117,28 +123,15 @@ export default class StartGame extends Laya.Script {
             if (number === 4) {
                 this.self.removeSelf();
                 this.gameControl.otherAppear();
-                this.gameControl.replacementCard('start');
+                if (this.watchAds) {
+                    this.gameControl.replacementCard('adv');
+                } else {
+                    this.gameControl.replacementCard('start');
+                }
             }
         }), number * delayed);
     }
 
-    onUpdate(): void {
-        if (this.startSwitch) {
-            if (this.startChange === 'appear') {
-                this.btn_start.scaleX += 0.003;
-                this.btn_start.scaleY += 0.003;
-                if (this.btn_start.scaleX > 1.1) {
-                    this.startChange = 'vanish';
-                }
-            } else if (this.startChange === 'vanish') {
-                this.btn_start.scaleX -= 0.003;
-                this.btn_start.scaleY -= 0.003;
-                if (this.btn_start.scaleX < 1) {
-                    this.startChange = 'appear';
-                }
-            }
-        }
-    }
 
     /**按钮的点击事件*/
     clicksOnBtn(): void {
@@ -146,6 +139,11 @@ export default class StartGame extends Laya.Script {
         this.btn_start.on(Laya.Event.MOUSE_MOVE, this, this.move);
         this.btn_start.on(Laya.Event.MOUSE_UP, this, this.up);
         this.btn_start.on(Laya.Event.MOUSE_OUT, this, this.out);
+
+        this.btn_adv.on(Laya.Event.MOUSE_DOWN, this, this.down);
+        this.btn_adv.on(Laya.Event.MOUSE_MOVE, this, this.move);
+        this.btn_adv.on(Laya.Event.MOUSE_UP, this, this.up);
+        this.btn_adv.on(Laya.Event.MOUSE_OUT, this, this.out);
 
         this.btn_ranking.on(Laya.Event.MOUSE_DOWN, this, this.down);
         this.btn_ranking.on(Laya.Event.MOUSE_MOVE, this, this.move);
@@ -164,6 +162,11 @@ export default class StartGame extends Laya.Script {
         this.btn_start.off(Laya.Event.MOUSE_MOVE, this, this.move);
         this.btn_start.off(Laya.Event.MOUSE_UP, this, this.up);
         this.btn_start.off(Laya.Event.MOUSE_OUT, this, this.out);
+
+        this.btn_adv.off(Laya.Event.MOUSE_DOWN, this, this.down);
+        this.btn_adv.off(Laya.Event.MOUSE_MOVE, this, this.move);
+        this.btn_adv.off(Laya.Event.MOUSE_UP, this, this.up);
+        this.btn_adv.off(Laya.Event.MOUSE_OUT, this, this.out);
 
         this.btn_ranking.off(Laya.Event.MOUSE_DOWN, this, this.down);
         this.btn_ranking.off(Laya.Event.MOUSE_MOVE, this, this.move);
@@ -189,19 +192,72 @@ export default class StartGame extends Laya.Script {
     /**抬起*/
     up(event): void {
         event.currentTarget.scale(1, 1);
-        this.clicksOffBtn();
         if (event.currentTarget.name === 'btn_start') {
             this.startVanish();
+            this.clicksOffBtn();
+        } else if (event.currentTarget.name === 'btn_adv') {
+            //实例
+            let videoAd = wx.createRewardedVideoAd({
+                adUnitId: 'adunit-6de18c6de7b6d9ab'
+            })
+            this.videoAd = videoAd;
+            videoAd.load()
+            //捕捉错误
+            videoAd.onError(err => {
+                console.log(err)
+            })
+            //关闭视频的回调函数
+            videoAd.onClose(res => {
+                // 用户点击了【关闭广告】按钮
+                // 小于 2.1.0 的基础库版本，res 是一个 undefined
+                console.log(res)
+                if (res && res.isEnded || res === undefined) {
+                    // 正常播放结束，可以下发游戏奖励
+                    this.watchAds = true;
+                    console.log('视频看完了，时间增加10s');
+                } else {
+                    // 播放中途退出，不下发游戏奖励
+                    this.watchAds = false;
+                    console.log('视频没有看完，没有奖励');
+                }
+            })
         } else if (event.currentTarget.name === 'btn_ranking') {
 
         } else if (event.currentTarget.name === 'btn_share') {
 
         }
     }
-
     /**出屏幕*/
     out(event): void {
         event.currentTarget.scale(1, 1);
+    }
+
+    onUpdate(): void {
+        if (this.startSwitch) {
+            if (this.startChange === 'appear') {
+
+                this.btn_start.scaleX += 0.003;
+                this.btn_start.scaleY += 0.003;
+
+                this.btn_adv.scaleX -= 0.003;
+                this.btn_adv.scaleY -= 0.003;
+
+                if (this.btn_start.scaleX > 1.1) {
+                    this.startChange = 'vanish';
+                }
+            } else if (this.startChange === 'vanish') {
+
+                this.btn_start.scaleX -= 0.003;
+                this.btn_start.scaleY -= 0.003;
+
+                this.btn_adv.scaleX += 0.003;
+                this.btn_adv.scaleY += 0.003;
+
+                if (this.btn_start.scaleX < 1) {
+                    this.startChange = 'appear';
+                }
+            }
+        }
     }
 
     onDisable(): void {
