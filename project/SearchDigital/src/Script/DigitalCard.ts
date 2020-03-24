@@ -18,6 +18,8 @@ export default class DigitalCard extends Laya.Script {
     /**关卡数*/
     private levels;
 
+
+
     constructor() { super(); }
 
     onEnable(): void {
@@ -85,6 +87,8 @@ export default class DigitalCard extends Laya.Script {
     }
     /**抬起*/
     up(event): void {
+        // 无论点错点对时间都停止
+        this.gameControl.timerSwitch = false;
         this.cardClicksOff();
         event.currentTarget.scale(1, 1);
         let indicateNum = this.gameControl.indicateNum;

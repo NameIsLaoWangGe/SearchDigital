@@ -33,6 +33,9 @@ export default class GameControl extends Laya.Script {
     /** @prop {name:gameOVer, tips:"游戏结束预制体", type:Prefab}*/
     public gameOVer: Laya.Prefab;
 
+    /** @prop {name:ranking, tips:"排行榜", type:Prefab}*/
+    public ranking: Laya.Prefab;
+
     /**指代this.ower,指代当前场景*/
     private self: Laya.Scene;
     /**时间线*/
@@ -42,6 +45,16 @@ export default class GameControl extends Laya.Script {
     /**内部关卡数*/
     private levels: number;
 
+    /**看视频广告开始游戏的视频实例*/
+    private videoAd;
+    /**监听变量，监听广告关闭，只能监听一次*/
+    private videoAdOnClose: boolean;
+
+    /**bannar广告实例*/
+    private bannerAd;
+
+    /**开始游戏界面，用于指向开始游戏界面*/
+    private startNode;
 
     constructor() { super(); }
 
@@ -58,8 +71,65 @@ export default class GameControl extends Laya.Script {
         this.levels = 0;
         this.levelsNum.value = this.levels.toString();
         this.timer = 0;
-        this.timeNum.value = '10s';
+        this.timeNum.value = '30s';
         this.timerSwitch = false;
+        this.videoAdOnClose = false;
+        this.videoAdLode();
+        this.bannerAdLode();
+    }
+
+    /**初始化视频广告*/
+    videoAdLode(): void {
+        // 创建激励视频广告实例，提前初始化
+        if (Laya.Browser.onMiniGame) {
+            this.videoAd = wx.createRewardedVideoAd({
+                adUnitId: 'adunit-6de18c6de7b6d9ab'
+            })
+            this.videoAd.onLoad(() => {
+                console.log('激励视频 广告加载成功')
+            })
+            this.videoAd.onError(err => {
+                console.log(err)
+            })
+            this.videoAd.onClose(res => {
+                // 用户点击了【关闭广告】按钮
+                // 小于 2.1.0 的基础库版本，res 是一个 undefined
+                if (res && res.isEnded || res === undefined) {
+                    // 正常播放结束，可以下发游戏奖励
+                    this.startNode['GameOVer'].startVanish('adv');
+                } else {
+                    // 播放中途退出，不下发游戏奖励
+                    console.log('视频没有看望不会开始游戏');
+                }
+            })
+        }
+    }
+
+    /**
+     * 初始化bannar广告
+     */
+    bannerAdLode(): void {
+        // 创建 Banner 广告实例，提前初始化
+        if (Laya.Browser.onMiniGame) {
+            this.bannerAd = wx.createBannerAd({
+                adUnitId: 'adunit-5329937f4349b0ea',
+                adIntervals: 30,
+                style: {
+                    left: 0,
+                    top: 0,
+                    width: 750
+                }
+            })
+            this.bannerAd.onLoad(() => {
+                console.log('banner 广告加载成功')
+            })
+
+            this.bannerAd.onError(err => {
+                console.log(err)
+            })
+
+            this.bannerAd.show();
+        }
     }
 
     /**自适应规则*/
@@ -71,19 +141,48 @@ export default class GameControl extends Laya.Script {
         this.background.x = 0;
         this.background.y = 0;
 
-        this.line.y = stageHeight * 0.19;
+        this.line.y = stageHeight * 0.202;
         this.line.alpha = 0;
 
-        this.levelsNode.y = stageHeight * 0.12;
+        let location = stageHeight * 0.132;
+        this.levelsNode.y = location;
         this.levelsNode.alpha = 0;
 
-        this.indicateCard.y = stageHeight * 0.12;
+        this.indicateCard.y = location;
         this.indicateCard.alpha = 0;
 
-        this.timeCard.y = stageHeight * 0.12;
+        this.timeCard.y = location;
         this.timeCard.alpha = 0;
 
         this.cardParent.y = stageHeight * 0.22;
+    }
+
+    /**牌局开始
+     * 一种情况是重新开始
+     * 一种情况是开始游戏界面进入的开始
+     * 一种是看完广告开始游戏
+     * @param type 
+     */
+    replacementCard(type): void {
+        if (type === 'start') {
+            this.levels = 1;
+            this.timeNum.value = '30s';
+
+        } else if (type === 'adv') {
+            this.levels = 1;
+            this.timeNum.value = '40s';
+
+        } else if (type === 'reStart') {
+            this.levels = 1;
+            this.timeNum.value = '30s';
+
+        } else if (type === 'nextLevel') {
+            this.levels++;
+        }
+        this.timer = -50;//少许延时
+        Laya.timer.once(200, this, function () {
+            this.levelsNode['LevelsNode'].levelsNodeAni('nextLevel', 120);
+        })
     }
 
     /**创建游戏开始界面*/
@@ -126,27 +225,6 @@ export default class GameControl extends Laya.Script {
         // 分割线动画
         Laya.Tween.to(this.line, { alpha: 1 }, time, null, Laya.Handler.create(this, function () {
         }), delayed * 3);
-    }
-
-    /**牌局开始
-     * 一种情况是重新开始
-     * 一种情况是开始游戏界面进入的开始
-     * 一种是看完广告开始游戏
-     * @param type 
-    */
-    replacementCard(type): void {
-        if (type === 'start') {
-            this.timeNum.value = '60s';
-        } else if (type === 'adv') {
-            this.timeNum.value = '70s';
-        } else if (type === 'reStart') {
-            this.timeNum.value = '60s';
-        }
-        this.levels = 0;
-        this.levels++;
-        Laya.timer.once(200, this, function () {
-            this.levelsNode['LevelsNode'].levelsNodeAni('nextLevel', 120);
-        })
     }
 
     /**构建数字牌集合
@@ -210,25 +288,55 @@ export default class GameControl extends Laya.Script {
     clearAllCard(type): void {
         this.clearAllClicks();
         let len = this.cardParent._children.length;
-        let delayed = 0;
         this.timerSwitch = false;//时间停止
+
         for (let i = 0; i < len; i++) {
             let card = this.cardParent._children[i] as Laya.Sprite;
-            delayed += 50;
-            Laya.timer.once(delayed, this, function () {
-                let rotate = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
-                Laya.Tween.to(card, { y: 1500, alpha: 0, rotation: rotate }, 800, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
-                    if (i === len - 1) {
-                        this.cardParent.removeChildren(0, len - 1);
-                        if (type === 'gameOver') {
-                            this.createGameOver();
-                        } else if (type === 'nextLevel') {
-                            this.replacementCard();
+            if (card['DigitalCard'].number.value === this.indicateNum.value) {
+                if (type === 'gameOver') {
+                    this.cardRotating(card);
+                }
+            } else {
+                Laya.timer.once(i * 50, this, function () {
+                    let rotate = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
+                    Laya.Tween.to(card, { y: 1500, alpha: 0, rotation: rotate }, 800, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+                        // 如果是创建下一关的话，遍历结束就会创建下一关
+                        if (type === 'nextLevel') {
+                            if (i === len - 1) {
+                                this.cardParent.removeChildren(0, len - 1);
+                                this.replacementCard('nextLevel');
+                            }
                         }
-                    }
-                }))
-            })
+                    }))
+                })
+            }
         }
+    }
+
+    /**自身旋转动画，用于点错后提示正确的那张卡牌
+     * 旋转之后下落
+     * 动画结束后进行游戏结束界面的创建
+    */
+    cardRotating(card): void {
+        let len = this.cardParent._children.length;
+        let time = 120;
+        Laya.timer.once(len * 50 + 500, this, function () {
+            Laya.Tween.to(card, { scaleY: 0 }, 120, null, Laya.Handler.create(this, function () {
+                card['DigitalCard'].number.alpha = 0;
+                Laya.Tween.to(card, { scaleY: 1 }, 120, null, Laya.Handler.create(this, function () {
+                    Laya.Tween.to(card, { scaleY: 0 }, 120, null, Laya.Handler.create(this, function () {
+                        card['DigitalCard'].number.alpha = 1;
+                        Laya.Tween.to(card, { scaleY: 1 }, 120, null, Laya.Handler.create(this, function () {
+                            // 下落
+                            Laya.Tween.to(card, { y: 1500, alpha: 0, rotation: Math.floor(Math.random() * 2) === 1 ? 30 : -30 }, 1300, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+                                this.cardParent.removeChildren(0, len - 1);
+                                this.createGameOver();
+                            }), 100)
+                        }))
+                    }))
+                }))
+            }))
+        })
     }
 
     /**清除卡牌上所有的点击事件*/
@@ -286,6 +394,12 @@ export default class GameControl extends Laya.Script {
         this.self.addChild(gameOVer);
     }
 
+    /**创建结算界面*/
+    createRanking(): void {
+        let ranking = Laya.Pool.getItemByCreateFun('ranking', this.ranking.create, this.ranking) as Laya.Sprite;
+        this.self.addChild(ranking);
+    }
+
     /**其他界面的自适应规则*/
     adaptiveOther(self): void {
         self.width = 750;
@@ -299,7 +413,7 @@ export default class GameControl extends Laya.Script {
         // 倒计时
         if (this.timerSwitch) {
             this.timer++;
-            if (this.timer % 60 == 0) {
+            if (this.timer % 60 == 0 && this.timer > 0) {
                 let timeNum = this.timeNum.value;
                 let subNum;
                 if (timeNum.length === 3) {

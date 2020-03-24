@@ -137,7 +137,7 @@
             "source":"src/Script/GameControl.ts",
             "searchKey":"Script,GameControl",
             "removeAble":true,
-            "props":{"y":-1,"x":0,"timeNum":"@node:17","timeCard":"@node:16","startGame":"@Prefab:Prefab/startGame.prefab","line":"@node:30","levelsNum":"@node:27","levelsNode":"@node:23","levels":"@node:23","levelNode":"@node:23","indicateNum":"@node:15","indicateCard":"@node:13","gameOVer":"@Prefab:Prefab/gameOver.prefab","digitalCard":"@Prefab:Prefab/digitalCard.prefab","cardParent":"@node:18","background":"@node:3"},
+            "props":{"y":-1,"x":0,"timeNum":"@node:17","timeCard":"@node:16","startGame":"@Prefab:Prefab/startGame.prefab","ranking":"@Prefab:Prefab/ranking.prefab","line":"@node:30","levelsNum":"@node:27","levelsNode":"@node:23","levels":"@node:23","levelNode":"@node:23","indicateNum":"@node:15","indicateCard":"@node:13","gameOVer":"@Prefab:Prefab/gameOver.prefab","digitalCard":"@Prefab:Prefab/digitalCard.prefab","cardParent":"@node:18","background":"@node:3"},
             "nodeParent":2,
             "label":"GameControl",
             "isDirectory":false,

@@ -1964,7 +1964,7 @@ interface _onWifiConnectedCallbackResult {
    */
   wifi: object;
 }
-interface _onUserCaptureScreenCallbackResult {}
+interface _onUserCaptureScreenCallbackResult { }
 interface _onSocketMessageCallbackResult {
   /**
    * 服务器返回的消息
@@ -4646,6 +4646,14 @@ declare namespace wx {
    * 批量添加卡券。
    */
   export function addCard(object: _addCardObject): void;
+  /**
+   *创建视屏广告 
+   */
+  export function createRewardedVideoAd(object: any): void;
+  /**
+   *创建bannar广告 
+   */
+  export function createBannerAd(object: any): void;
 
   /**
    * 调用后，用户可以选择将该表单以“新增联系人”或“添加到已有联系人”的方式，写入手机系统通讯录，完成手机通讯录联系人和联系方式的增加。
@@ -5620,16 +5628,16 @@ declare namespace wx {
   /***
    * 监听主域发送的消息
    */
-  export function onMessage(callback:Function):void;
+  export function onMessage(callback: Function): void;
   /**
    * 拉取当前用户所有同玩好友的托管数据。该接口只可在开放数据域下使用
    */
-  export function getFriendCloudStorage(object):void;
+  export function getFriendCloudStorage(object): void;
   /**
    * 对用户托管数据进行写数据操作。允许同时写多组 KV 数据。
    * @param object 
    */
-  export function setUserCloudStorage(object):void;
+  export function setUserCloudStorage(object): void;
   /**
    * 向低功耗蓝牙设备特征值中写入二进制数据。注意：必须设备的特征值支持`write`才可以成功调用，具体参照 characteristic 的 properties 属性
    */

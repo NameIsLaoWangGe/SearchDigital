@@ -4,6 +4,7 @@ import GameControl from "./Script/GameControl"
 import LevelsNode from "./Script/LevelsNode"
 import DigitalCard from "./Script/DigitalCard"
 import GameOver from "./Script/GameOver"
+import Ranking from "./Script/Ranking"
 import StartGame from "./Script/StartGame"
 /*
 * 游戏初始化配置;
@@ -18,7 +19,7 @@ export default class GameConfig{
     static startScene:any="Scene/MainScene.scene";
     static sceneRoot:string="";
     static debug:boolean=false;
-    static stat:boolean=false;
+    static stat:boolean=true;
     static physicsDebug:boolean=false;
     static exportSceneToJson:boolean=true;
     constructor(){}
@@ -29,6 +30,7 @@ export default class GameConfig{
         reg("Script/LevelsNode.ts",LevelsNode);
         reg("Script/DigitalCard.ts",DigitalCard);
         reg("Script/GameOver.ts",GameOver);
+        reg("Script/Ranking.ts",Ranking);
         reg("Script/StartGame.ts",StartGame);
     }
 }

@@ -34,6 +34,7 @@ export default class StartGame extends Laya.Script {
     /**开始游戏按别扭的渐隐动画开关*/
     private startSwitch: boolean;
     private startChange: string;
+
     /**保存视频实例*/
     private videoAd;
     /**是否观看了视频*/
@@ -49,12 +50,14 @@ export default class StartGame extends Laya.Script {
         this.indicateCard = this.gameControl.indicateCard as Laya.Sprite;
         this.timeCard = this.gameControl.timeCard as Laya.Sprite;
         this.line = this.gameControl.line as Laya.Sprite;
+        this.gameControl.startNode = this.self;
 
         this.startSwitch = false;
         this.startChange = 'appear';
         this.watchAds = false;
 
         this.gameControl.adaptiveOther(this.self);
+        this.videoAd = this.gameControl.videoAd;
 
         this.appaer();
     }
@@ -85,7 +88,6 @@ export default class StartGame extends Laya.Script {
         this.commonAppear(this.btn_adv, 2, 667);
         this.commonAppear(this.btn_ranking, 3, 877);
         this.commonAppear(this.btn_share, 4, 877);
-        // this.commonAppear(this.anti_addiction, 5, Laya.stage.height * 9 / 10);
         Laya.Tween.to(this.anti_addiction, { alpha: 1 }, 1000, null, Laya.Handler.create(this, function () {
         }));
     }
@@ -98,21 +100,35 @@ export default class StartGame extends Laya.Script {
             if (number === 4) {
                 this.startSwitch = true;
                 this.clicksOnBtn();
+                // 显示bannar广告
+                if (Laya.Browser.onMiniGame) {
+                    this.gameControl.bannerAd.show()
+                        .then(() => console.log('banner 广告显示'));
+                }
             }
         }), number * delayed);
     }
 
     /**消失动画
+     * 一种是普通开始
+     * 一种是看广告开始
+     *@param  type 
     */
-    startVanish(): void {
+    startVanish(type): void {
         Laya.Tween.to(this.anti_addiction, { alpha: 0 }, 300, null, Laya.Handler.create(this, function () {
         }));
         this.commonVanish(this.logo, 0, Math.floor(Math.random() * 2) === 1 ? 30 : -30);
         this.commonVanish(this.btn_start, 1, Math.floor(Math.random() * 2) === 1 ? 30 : -30);
         this.commonVanish(this.btn_adv, 2, Math.floor(Math.random() * 2) === 1 ? 30 : -30);
         this.commonVanish(this.btn_ranking, 3, Math.floor(Math.random() * 2) === 1 ? 30 : -30);
-        this.commonVanish(this.btn_share, 4, Math.floor(Math.random() * 2) === 1 ? 30 : -30);
-        // this.commonVanish(this.anti_addiction, 5, Math.floor(Math.random() * 2) === 1 ? 30 : -30);
+        // 有类型的单独拿出来
+        let time = 600;
+        let delayed = 150;
+        Laya.Tween.to(this.btn_share, { y: 1800, rotation: Math.floor(Math.random() * 2) === 1 ? 30 : -30 }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+            this.self.removeSelf();
+            this.gameControl.otherAppear();
+            this.gameControl.replacementCard(type);
+        }), 4 * 150);
     }
 
     /**通用消失动画*/
@@ -131,7 +147,6 @@ export default class StartGame extends Laya.Script {
             }
         }), number * delayed);
     }
-
 
     /**按钮的点击事件*/
     clicksOnBtn(): void {
@@ -189,39 +204,33 @@ export default class StartGame extends Laya.Script {
         event.currentTarget.scale(1, 1);
 
     }
+
     /**抬起*/
     up(event): void {
         event.currentTarget.scale(1, 1);
         if (event.currentTarget.name === 'btn_start') {
-            this.startVanish();
+            // 关闭bannar广告
+            if (Laya.Browser.onMiniGame) {
+                this.gameControl.bannerAd.hide();
+            }
+            this.startVanish('start');
             this.clicksOffBtn();
         } else if (event.currentTarget.name === 'btn_adv') {
-            //实例
-            let videoAd = wx.createRewardedVideoAd({
-                adUnitId: 'adunit-6de18c6de7b6d9ab'
-            })
-            this.videoAd = videoAd;
-            videoAd.load()
-            //捕捉错误
-            videoAd.onError(err => {
-                console.log(err)
-            })
-            //关闭视频的回调函数
-            videoAd.onClose(res => {
-                // 用户点击了【关闭广告】按钮
-                // 小于 2.1.0 的基础库版本，res 是一个 undefined
-                console.log(res)
-                if (res && res.isEnded || res === undefined) {
-                    // 正常播放结束，可以下发游戏奖励
-                    this.watchAds = true;
-                    console.log('视频看完了，时间增加10s');
-                } else {
-                    // 播放中途退出，不下发游戏奖励
-                    this.watchAds = false;
-                    console.log('视频没有看完，没有奖励');
-                }
+            // 关闭bannar广告
+            if (Laya.Browser.onMiniGame) {
+                this.gameControl.bannerAd.hide();
+            }
+            // 用户触发广告后，显示激励视频广告
+            this.videoAd.show().catch(() => {
+                // 失败重试
+                this.videoAd.load()
+                    .then(() => this.videoAd.show())
+                    .catch(err => {
+                        console.log('激励视频 广告显示失败')
+                    })
             })
         } else if (event.currentTarget.name === 'btn_ranking') {
+            this.gameControl.createRanking();
 
         } else if (event.currentTarget.name === 'btn_share') {
 

@@ -63,8 +63,52 @@
            this.levels = 0;
            this.levelsNum.value = this.levels.toString();
            this.timer = 0;
-           this.timeNum.value = '10s';
+           this.timeNum.value = '30s';
            this.timerSwitch = false;
+           this.videoAdOnClose = false;
+           this.videoAdLode();
+           this.bannerAdLode();
+       }
+       videoAdLode() {
+           if (Laya.Browser.onMiniGame) {
+               this.videoAd = wx.createRewardedVideoAd({
+                   adUnitId: 'adunit-6de18c6de7b6d9ab'
+               });
+               this.videoAd.onLoad(() => {
+                   console.log('激励视频 广告加载成功');
+               });
+               this.videoAd.onError(err => {
+                   console.log(err);
+               });
+               this.videoAd.onClose(res => {
+                   if (res && res.isEnded || res === undefined) {
+                       this.startNode['GameOVer'].startVanish('adv');
+                   }
+                   else {
+                       console.log('视频没有看望不会开始游戏');
+                   }
+               });
+           }
+       }
+       bannerAdLode() {
+           if (Laya.Browser.onMiniGame) {
+               this.bannerAd = wx.createBannerAd({
+                   adUnitId: 'adunit-5329937f4349b0ea',
+                   adIntervals: 30,
+                   style: {
+                       left: 0,
+                       top: 0,
+                       width: 750
+                   }
+               });
+               this.bannerAd.onLoad(() => {
+                   console.log('banner 广告加载成功');
+               });
+               this.bannerAd.onError(err => {
+                   console.log(err);
+               });
+               this.bannerAd.show();
+           }
        }
        adaptiveRule() {
            let stageHeight = Laya.stage.height;
@@ -72,15 +116,37 @@
            this.background.height = stageHeight;
            this.background.x = 0;
            this.background.y = 0;
-           this.line.y = stageHeight * 0.19;
+           this.line.y = stageHeight * 0.202;
            this.line.alpha = 0;
-           this.levelsNode.y = stageHeight * 0.12;
+           let location = stageHeight * 0.132;
+           this.levelsNode.y = location;
            this.levelsNode.alpha = 0;
-           this.indicateCard.y = stageHeight * 0.12;
+           this.indicateCard.y = location;
            this.indicateCard.alpha = 0;
-           this.timeCard.y = stageHeight * 0.12;
+           this.timeCard.y = location;
            this.timeCard.alpha = 0;
            this.cardParent.y = stageHeight * 0.22;
+       }
+       replacementCard(type) {
+           if (type === 'start') {
+               this.levels = 1;
+               this.timeNum.value = '30s';
+           }
+           else if (type === 'adv') {
+               this.levels = 1;
+               this.timeNum.value = '40s';
+           }
+           else if (type === 'reStart') {
+               this.levels = 1;
+               this.timeNum.value = '30s';
+           }
+           else if (type === 'nextLevel') {
+               this.levels++;
+           }
+           this.timer = -50;
+           Laya.timer.once(200, this, function () {
+               this.levelsNode['LevelsNode'].levelsNodeAni('nextLevel', 120);
+           });
        }
        createStartGame() {
            let startGame = Laya.Pool.getItemByCreateFun('startGame', this.startGame.create, this.startGame);
@@ -109,22 +175,6 @@
            }), delayed * 2);
            Laya.Tween.to(this.line, { alpha: 1 }, time, null, Laya.Handler.create(this, function () {
            }), delayed * 3);
-       }
-       replacementCard(type) {
-           if (type === 'start') {
-               this.timeNum.value = '60s';
-           }
-           else if (type === 'adv') {
-               this.timeNum.value = '70s';
-           }
-           else if (type === 'reStart') {
-               this.timeNum.value = '60s';
-           }
-           this.levels = 0;
-           this.levels++;
-           Laya.timer.once(200, this, function () {
-               this.levelsNode['LevelsNode'].levelsNodeAni('nextLevel', 120);
-           });
        }
        cardCollection() {
            let spacingY = 5;
@@ -171,26 +221,47 @@
        clearAllCard(type) {
            this.clearAllClicks();
            let len = this.cardParent._children.length;
-           let delayed = 0;
            this.timerSwitch = false;
            for (let i = 0; i < len; i++) {
                let card = this.cardParent._children[i];
-               delayed += 50;
-               Laya.timer.once(delayed, this, function () {
-                   let rotate = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
-                   Laya.Tween.to(card, { y: 1500, alpha: 0, rotation: rotate }, 800, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
-                       if (i === len - 1) {
-                           this.cardParent.removeChildren(0, len - 1);
-                           if (type === 'gameOver') {
-                               this.createGameOver();
+               if (card['DigitalCard'].number.value === this.indicateNum.value) {
+                   if (type === 'gameOver') {
+                       this.cardRotating(card);
+                   }
+               }
+               else {
+                   Laya.timer.once(i * 50, this, function () {
+                       let rotate = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
+                       Laya.Tween.to(card, { y: 1500, alpha: 0, rotation: rotate }, 800, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+                           if (type === 'nextLevel') {
+                               if (i === len - 1) {
+                                   this.cardParent.removeChildren(0, len - 1);
+                                   this.replacementCard('nextLevel');
+                               }
                            }
-                           else if (type === 'nextLevel') {
-                               this.replacementCard();
-                           }
-                       }
-                   }));
-               });
+                       }));
+                   });
+               }
            }
+       }
+       cardRotating(card) {
+           let len = this.cardParent._children.length;
+           Laya.timer.once(len * 50 + 500, this, function () {
+               Laya.Tween.to(card, { scaleY: 0 }, 120, null, Laya.Handler.create(this, function () {
+                   card['DigitalCard'].number.alpha = 0;
+                   Laya.Tween.to(card, { scaleY: 1 }, 120, null, Laya.Handler.create(this, function () {
+                       Laya.Tween.to(card, { scaleY: 0 }, 120, null, Laya.Handler.create(this, function () {
+                           card['DigitalCard'].number.alpha = 1;
+                           Laya.Tween.to(card, { scaleY: 1 }, 120, null, Laya.Handler.create(this, function () {
+                               Laya.Tween.to(card, { y: 1500, alpha: 0, rotation: Math.floor(Math.random() * 2) === 1 ? 30 : -30 }, 1300, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+                                   this.cardParent.removeChildren(0, len - 1);
+                                   this.createGameOver();
+                               }), 100);
+                           }));
+                       }));
+                   }));
+               }));
+           });
        }
        clearAllClicks() {
            for (let index = 0; index < this.cardParent._children.length; index++) {
@@ -236,6 +307,10 @@
            let gameOVer = Laya.Pool.getItemByCreateFun('gameOVer', this.gameOVer.create, this.gameOVer);
            this.self.addChild(gameOVer);
        }
+       createRanking() {
+           let ranking = Laya.Pool.getItemByCreateFun('ranking', this.ranking.create, this.ranking);
+           this.self.addChild(ranking);
+       }
        adaptiveOther(self) {
            self.width = 750;
            self.height = Laya.stage.height;
@@ -246,7 +321,7 @@
        onUpdate() {
            if (this.timerSwitch) {
                this.timer++;
-               if (this.timer % 60 == 0) {
+               if (this.timer % 60 == 0 && this.timer > 0) {
                    let timeNum = this.timeNum.value;
                    let subNum;
                    if (timeNum.length === 3) {
@@ -352,6 +427,7 @@
            event.currentTarget.scale(1, 1);
        }
        up(event) {
+           this.gameControl.timerSwitch = false;
            this.cardClicksOff();
            event.currentTarget.scale(1, 1);
            let indicateNum = this.gameControl.indicateNum;
@@ -418,6 +494,9 @@
            this.levelsNode['LevelsNode'].levelsNodeAni('common', 100);
            Laya.Tween.to(this.indicateCard, { alpha: 0 }, time * 2, null, Laya.Handler.create(this, function () {
                this.clicksOnBtn();
+               if (Laya.Browser.onMiniGame) {
+                   this.gameControl.bannerAd.show();
+               }
            }), 60);
            Laya.Tween.to(this.timeCard, { alpha: 0 }, time * 2, null, Laya.Handler.create(this, function () {
            }), 30);
@@ -454,6 +533,9 @@
            let time = 800;
            let targetY = 1800;
            Laya.Tween.to(this.logo, { y: targetY, rotation: Rrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+               if (Laya.Browser.onMiniGame) {
+                   this.gameControl.bannerAd.hide();
+               }
                this.self.removeSelf();
                this.homing(type);
            }), 300);
@@ -522,6 +604,65 @@
        }
    }
 
+   class Ranking extends Laya.Script {
+       constructor() { super(); }
+       onEnable() {
+           this.self = this.owner;
+           this.self['GameOVer'] = this;
+           this.gameControl = this.self.scene['Gamecontrol'];
+           this.gameControl.adaptiveOther(this.self);
+           this.background.width = Laya.stage.width;
+           this.background.height = Laya.stage.height;
+           this.appear();
+       }
+       appear() {
+           this.background.alpha = 0.3;
+           this.baseboard.alpha = 0;
+           let time = 300;
+           Laya.Tween.to(this.background, { alpha: 0.3 }, time, null, Laya.Handler.create(this, function () {
+           }), 0);
+           Laya.Tween.to(this.baseboard, { alpha: 1 }, time, null, Laya.Handler.create(this, function () {
+               this.clicksOnBtn();
+           }), 0);
+       }
+       vanish() {
+           let time = 300;
+           Laya.Tween.to(this.background, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
+               this.self.removeSelf();
+           }), 0);
+           Laya.Tween.to(this.baseboard, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
+           }), 0);
+       }
+       clicksOnBtn() {
+           this.background.on(Laya.Event.MOUSE_DOWN, this, this.down);
+           this.background.on(Laya.Event.MOUSE_MOVE, this, this.move);
+           this.background.on(Laya.Event.MOUSE_UP, this, this.up);
+           this.background.on(Laya.Event.MOUSE_OUT, this, this.out);
+       }
+       clicksOffBtn() {
+           this.background.off(Laya.Event.MOUSE_DOWN, this, this.down);
+           this.background.off(Laya.Event.MOUSE_MOVE, this, this.move);
+           this.background.off(Laya.Event.MOUSE_UP, this, this.up);
+           this.background.off(Laya.Event.MOUSE_OUT, this, this.out);
+       }
+       down(event) {
+           event.currentTarget.scale(1.1, 1.1);
+       }
+       move(event) {
+           event.currentTarget.scale(1, 1);
+       }
+       up(event) {
+           event.currentTarget.scale(1, 1);
+           this.vanish();
+           console.log('我点击了背景！');
+       }
+       out(event) {
+           event.currentTarget.scale(1, 1);
+       }
+       onDisable() {
+       }
+   }
+
    class StartGame extends Laya.Script {
        constructor() { super(); }
        onEnable() {
@@ -532,10 +673,12 @@
            this.indicateCard = this.gameControl.indicateCard;
            this.timeCard = this.gameControl.timeCard;
            this.line = this.gameControl.line;
+           this.gameControl.startNode = this.self;
            this.startSwitch = false;
            this.startChange = 'appear';
            this.watchAds = false;
            this.gameControl.adaptiveOther(this.self);
+           this.videoAd = this.gameControl.videoAd;
            this.appaer();
        }
        appaer() {
@@ -567,17 +710,26 @@
                if (number === 4) {
                    this.startSwitch = true;
                    this.clicksOnBtn();
+                   if (Laya.Browser.onMiniGame) {
+                       this.gameControl.bannerAd.show()
+                           .then(() => console.log('banner 广告显示'));
+                   }
                }
            }), number * delayed);
        }
-       startVanish() {
+       startVanish(type) {
            Laya.Tween.to(this.anti_addiction, { alpha: 0 }, 300, null, Laya.Handler.create(this, function () {
            }));
            this.commonVanish(this.logo, 0, Math.floor(Math.random() * 2) === 1 ? 30 : -30);
            this.commonVanish(this.btn_start, 1, Math.floor(Math.random() * 2) === 1 ? 30 : -30);
            this.commonVanish(this.btn_adv, 2, Math.floor(Math.random() * 2) === 1 ? 30 : -30);
            this.commonVanish(this.btn_ranking, 3, Math.floor(Math.random() * 2) === 1 ? 30 : -30);
-           this.commonVanish(this.btn_share, 4, Math.floor(Math.random() * 2) === 1 ? 30 : -30);
+           let time = 600;
+           Laya.Tween.to(this.btn_share, { y: 1800, rotation: Math.floor(Math.random() * 2) === 1 ? 30 : -30 }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+               this.self.removeSelf();
+               this.gameControl.otherAppear();
+               this.gameControl.replacementCard(type);
+           }), 4 * 150);
        }
        commonVanish(node, number, rotation) {
            let time = 600;
@@ -640,31 +792,27 @@
        up(event) {
            event.currentTarget.scale(1, 1);
            if (event.currentTarget.name === 'btn_start') {
-               this.startVanish();
+               if (Laya.Browser.onMiniGame) {
+                   this.gameControl.bannerAd.hide();
+               }
+               this.startVanish('start');
                this.clicksOffBtn();
            }
            else if (event.currentTarget.name === 'btn_adv') {
-               let videoAd = wx.createRewardedVideoAd({
-                   adUnitId: 'adunit-6de18c6de7b6d9ab'
-               });
-               this.videoAd = videoAd;
-               videoAd.load();
-               videoAd.onError(err => {
-                   console.log(err);
-               });
-               videoAd.onClose(res => {
-                   console.log(res);
-                   if (res && res.isEnded || res === undefined) {
-                       this.watchAds = true;
-                       console.log('视频看完了，时间增加10s');
-                   }
-                   else {
-                       this.watchAds = false;
-                       console.log('视频没有看完，没有奖励');
-                   }
+               if (Laya.Browser.onMiniGame) {
+                   this.gameControl.bannerAd.hide();
+               }
+               this.videoAd.show().catch(() => {
+                   this.videoAd.load()
+                       .then(() => this.videoAd.show())
+                       .catch(err => {
+                       console.log('激励视频 广告显示失败');
+                   });
                });
            }
-           else if (event.currentTarget.name === 'btn_ranking') ;
+           else if (event.currentTarget.name === 'btn_ranking') {
+               this.gameControl.createRanking();
+           }
            else if (event.currentTarget.name === 'btn_share') ;
        }
        out(event) {
@@ -705,6 +853,7 @@
            reg("Script/LevelsNode.ts", LevelsNode);
            reg("Script/DigitalCard.ts", DigitalCard);
            reg("Script/GameOver.ts", GameOver);
+           reg("Script/Ranking.ts", Ranking);
            reg("Script/StartGame.ts", StartGame);
        }
    }
@@ -717,7 +866,7 @@
    GameConfig.startScene = "Scene/MainScene.scene";
    GameConfig.sceneRoot = "";
    GameConfig.debug = false;
-   GameConfig.stat = false;
+   GameConfig.stat = true;
    GameConfig.physicsDebug = false;
    GameConfig.exportSceneToJson = true;
    GameConfig.init();

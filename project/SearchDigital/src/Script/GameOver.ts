@@ -89,6 +89,10 @@ export default class GameOver extends Laya.Script {
         // 提示卡牌动画
         Laya.Tween.to(this.indicateCard, { alpha: 0 }, time * 2, null, Laya.Handler.create(this, function () {
             this.clicksOnBtn();
+            // 开启bannar广告
+            if (Laya.Browser.onMiniGame) {
+                this.gameControl.bannerAd.show();
+            }
         }), 60);
 
         // 时间节点动画
@@ -134,6 +138,7 @@ export default class GameOver extends Laya.Script {
                 this.gameControl.createStartGame();
                 this.gameControl.otherVanish();
             }
+
         }), 500);
     }
 
@@ -143,6 +148,7 @@ export default class GameOver extends Laya.Script {
      * @param type
     */
     vanish(type): void {
+
         let Lrotation = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
         let Arotation = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
         let Rrotation = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
@@ -154,6 +160,10 @@ export default class GameOver extends Laya.Script {
         let time = 800;
         let targetY = 1800;
         Laya.Tween.to(this.logo, { y: targetY, rotation: Rrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+            // 关闭bannar广告
+            if (Laya.Browser.onMiniGame) {
+                this.gameControl.bannerAd.hide();
+            }
             this.self.removeSelf();
             this.homing(type);
         }), 300);
