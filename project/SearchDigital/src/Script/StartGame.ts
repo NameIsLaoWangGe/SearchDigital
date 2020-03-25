@@ -57,6 +57,7 @@ export default class StartGame extends Laya.Script {
         this.watchAds = false;
 
         this.gameControl.adaptiveOther(this.self);
+
         this.videoAd = this.gameControl.videoAd;
 
         this.appaer();
@@ -80,7 +81,7 @@ export default class StartGame extends Laya.Script {
         this.btn_share.y = firstY;
         this.btn_share.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
 
-        this.anti_addiction.y = Laya.stage.height * 9 / 10;
+        this.gameControl.childAdaptive(this.anti_addiction, this.self, Laya.stage.height * 9 / 10);
         this.anti_addiction.alpha = 0;
 
         this.commonAppear(this.logo, 0, 416);
@@ -233,7 +234,7 @@ export default class StartGame extends Laya.Script {
             this.gameControl.createRanking();
 
         } else if (event.currentTarget.name === 'btn_share') {
-
+            this.gameControl.wxShare();
         }
     }
     /**出屏幕*/

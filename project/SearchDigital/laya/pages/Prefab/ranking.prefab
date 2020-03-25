@@ -1,12 +1,12 @@
 {
     "x":0,
     "type":"Sprite",
-    "selectedBox":34,
-    "selecteID":43,
+    "selectedBox":43,
+    "selecteID":46,
     "searchKey":"Sprite,ranking",
     "props":{"y":0,"x":0,"width":750,"presetID":1,"preset":"laya/pages/Prefab/ranking.prefab","name":"ranking","mouseThrough":false,"mouseEnabled":true,"isPresetRoot":true,"height":1334},
     "nodeParent":-1,
-    "maxID":46,
+    "maxID":47,
     "label":"ranking",
     "isOpen":true,
     "isDirectory":true,
@@ -52,6 +52,20 @@
                     "isAniNode":true,
                     "hasChild":false,
                     "compId":44,
+                    "child":[
+                        ]
+                },
+                {
+                    "x":30,
+                    "type":"Sprite",
+                    "searchKey":"Sprite",
+                    "props":{"y":73,"x":337,"width":155,"texture":"UI/排行榜.png","presetID":6,"preset":"laya/pages/Prefab/ranking.prefab","pivotY":28,"pivotX":78,"height":56},
+                    "nodeParent":43,
+                    "label":"Sprite(ranking)",
+                    "isDirectory":false,
+                    "isAniNode":true,
+                    "hasChild":false,
+                    "compId":46,
                     "child":[
                         ]
                 }]

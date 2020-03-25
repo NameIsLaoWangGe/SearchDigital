@@ -41,6 +41,7 @@ export default class GameOver extends Laya.Script {
 
         this.gameControl.adaptiveOther(this.self);
         this.appaer();
+        this.gameControl.wxPostData();
     }
 
     /**出现动画*/
@@ -89,10 +90,10 @@ export default class GameOver extends Laya.Script {
         // 提示卡牌动画
         Laya.Tween.to(this.indicateCard, { alpha: 0 }, time * 2, null, Laya.Handler.create(this, function () {
             this.clicksOnBtn();
-            // 开启bannar广告
-            if (Laya.Browser.onMiniGame) {
-                this.gameControl.bannerAd.show();
-            }
+            // // 开启bannar广告
+            // if (Laya.Browser.onMiniGame) {
+            //     this.gameControl.bannerAd.show();
+            // }
         }), 60);
 
         // 时间节点动画

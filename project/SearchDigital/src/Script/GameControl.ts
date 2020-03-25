@@ -76,6 +76,7 @@ export default class GameControl extends Laya.Script {
         this.videoAdOnClose = false;
         this.videoAdLode();
         this.bannerAdLode();
+        this.wxPostInit();
     }
 
     /**初始化视频广告*/
@@ -97,7 +98,17 @@ export default class GameControl extends Laya.Script {
                 if (res && res.isEnded || res === undefined) {
                     // 正常播放结束，可以下发游戏奖励
                     this.startNode['GameOVer'].startVanish('adv');
+                    
+                    // 关闭bannar广告
+                    if (Laya.Browser.onMiniGame) {
+                        this.bannerAd.hide();
+                    }
                 } else {
+                    // 显示bannar广告
+                    if (Laya.Browser.onMiniGame) {
+                        this.bannerAd.show()
+                            .then(() => console.log('banner 广告显示'));
+                    }
                     // 播放中途退出，不下发游戏奖励
                     console.log('视频没有看望不会开始游戏');
                 }
@@ -155,6 +166,8 @@ export default class GameControl extends Laya.Script {
         this.timeCard.alpha = 0;
 
         this.cardParent.y = stageHeight * 0.22;
+
+        this.cardAndParentAdaptive();
     }
 
     /**牌局开始
@@ -227,11 +240,24 @@ export default class GameControl extends Laya.Script {
         }), delayed * 3);
     }
 
+    /**卡牌的高度*/
+    private cardHeight: number;
+    /**卡牌之间的间距*/
+    private cardSpacingY: number;
+    /**卡牌高度和卡牌父节点的适配规则*/
+    cardAndParentAdaptive(): void {
+        this.cardSpacingY = 5;
+        // 通过卡牌父节点位置向下算出卡牌可以存放的空间位置
+        let remainingW = this.self.height - this.cardParent.y - this.self.height * 0.05;
+        // 单个卡牌可以存放的位置
+        let cardSpace = remainingW / 7;
+        this.cardHeight = cardSpace - this.cardSpacingY;
+    }
+
     /**构建数字牌集合
      * 卡牌数量根据关卡数来计算，并且如果没有铺满的情况下，集中在卡牌父节点中间；
     */
     cardCollection(): void {
-        let spacingY = 5;
         // 卡牌数量是固定的
         let startX1 = this.cardParent.width / 4;
         let startX2 = this.cardParent.width * 3 / 4;
@@ -250,17 +276,20 @@ export default class GameControl extends Laya.Script {
             } else {
                 card = this.createCard('change') as Laya.Sprite;
             }
-            // 初始位置
+            // 初始属性
             card.y = 1500;
             card.zOrder = Math.floor(Math.random() * 30);
+            card.height = this.cardHeight;
+            card['DigitalCard'].board.height = this.cardHeight;
+            card['DigitalCard'].number.y = this.cardHeight / 2;
             //目标位置
             let tagetY;
             if (j % 2 === 0) {
                 card.x = startX1;
-                tagetY = j / 2 * (card.height + spacingY) + 80;
+                tagetY = j / 2 * (card.height + this.cardSpacingY) + 80;
             } else {
                 card.x = startX2;
-                tagetY = (j - 1) / 2 * (card.height + spacingY) + 80;
+                tagetY = (j - 1) / 2 * (card.height + this.cardSpacingY) + 80;
             }
             // 随机一个角度
             card.rotation = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
@@ -299,7 +328,7 @@ export default class GameControl extends Laya.Script {
             } else {
                 Laya.timer.once(i * 50, this, function () {
                     let rotate = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
-                    Laya.Tween.to(card, { y: 1500, alpha: 0, rotation: rotate }, 800, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+                    Laya.Tween.to(card, { y: 1800, alpha: 0, rotation: rotate }, 800, null, Laya.Handler.create(this, function () {
                         // 如果是创建下一关的话，遍历结束就会创建下一关
                         if (type === 'nextLevel') {
                             if (i === len - 1) {
@@ -328,7 +357,7 @@ export default class GameControl extends Laya.Script {
                         card['DigitalCard'].number.alpha = 1;
                         Laya.Tween.to(card, { scaleY: 1 }, 120, null, Laya.Handler.create(this, function () {
                             // 下落
-                            Laya.Tween.to(card, { y: 1500, alpha: 0, rotation: Math.floor(Math.random() * 2) === 1 ? 30 : -30 }, 1300, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+                            Laya.Tween.to(card, { y: 1800, alpha: 0, rotation: Math.floor(Math.random() * 2) === 1 ? 30 : -30 }, 1400, null, Laya.Handler.create(this, function () {
                                 this.cardParent.removeChildren(0, len - 1);
                                 this.createGameOver();
                             }), 100)
@@ -394,19 +423,74 @@ export default class GameControl extends Laya.Script {
         this.self.addChild(gameOVer);
     }
 
-    /**创建结算界面*/
+    /**创建排行榜界面*/
     createRanking(): void {
         let ranking = Laya.Pool.getItemByCreateFun('ranking', this.ranking.create, this.ranking) as Laya.Sprite;
         this.self.addChild(ranking);
+
+        // 关闭bannar广告
+        if (Laya.Browser.onMiniGame) {
+            this.bannerAd.hide();
+        }
     }
 
     /**其他界面的自适应规则*/
     adaptiveOther(self): void {
         self.width = 750;
-        self.height = Laya.stage.height;
-        self.pivotX = this.self.width / 2;
-        self.pivotY = this.self.height / 2;
+        self.pivotX = self.width / 2;
+        self.pivotY = self.height / 2;
         self.pos(375, Laya.stage.height / 2);
+    }
+
+    /**界面内子元素Y轴适配*/
+    childAdaptive(child, parent, locationY): void {
+        child.y = locationY - (Laya.stage.height / 2 - parent.height / 2);
+    }
+
+    /** 微信排行榜初始化*/
+    wxPostInit() {
+        if (Laya.Browser.onMiniGame) {
+            Laya.loader.load(["res/atlas/rank.atlas"], Laya.Handler.create(null, function () {
+                //加载完成
+                //使用接口将图集透传到子域
+                Laya.MiniAdpter.sendAtlasToOpenDataContext("res/atlas/rank.atlas");
+
+                let wx: any = Laya.Browser.window.wx;
+                let openDataContext: any = wx.getOpenDataContext();
+                openDataContext.postMessage({ action: 'init' });
+            }));
+        }
+    }
+
+    /** 更新微信排行榜的数据*/
+    wxPostData() {
+        if (Laya.Browser.onMiniGame) {
+            let args = {
+                type: 'scores', data: { scores: this.levelsNum.value }
+            }
+            let wx: any = Laya.Browser.window.wx;
+            let openDataContext: any = wx.getOpenDataContext();
+            openDataContext.postMessage(args);
+            console.log('上传了');
+        } else {
+            console.log('没有上传');
+        }
+    }
+
+    /**分享*/
+    wxShare() {
+        if (Laya.Browser.onMiniGame) {
+            let wx: any = Laya.Browser.window.wx;
+            //下次测试
+            wx.shareAppMessage({
+                title: '数字找茬',
+                imageUrlId: 'CRYATpcgSFGkeB4Hs75jOQ',
+                imageUrl: 'https://mmocgame.qpic.cn/wechatgame/9zdKibmXJ3RsmFpXn6UAV4ScT8ulA4wzqUUNicKWDIaODZbuv38lkBBOBQv8XbxOI0/0'
+            });
+            console.log("主动进行了转发");
+        } else {
+            console.log("仅支持微信客户端");
+        }
     }
 
     onUpdate(): void {
@@ -430,6 +514,8 @@ export default class GameControl extends Laya.Script {
             }
         }
     }
+
+
 
     onDisable(): void {
     }

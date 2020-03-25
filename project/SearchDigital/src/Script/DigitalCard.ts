@@ -1,5 +1,5 @@
 import GameControl from "./GameControl";
-
+import NodeAni from "./Animation/NodeAni";
 export default class DigitalCard extends Laya.Script {
     /** @prop {name:board, tips:"数字底板", type:Node}*/
     public board: Laya.Image;
@@ -17,8 +17,6 @@ export default class DigitalCard extends Laya.Script {
     private indicateCard;
     /**关卡数*/
     private levels;
-
-
 
     constructor() { super(); }
 

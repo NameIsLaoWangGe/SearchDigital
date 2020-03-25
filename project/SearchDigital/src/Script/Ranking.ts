@@ -16,11 +16,22 @@ export default class Ranking extends Laya.Script {
         this.self['GameOVer'] = this;
         this.gameControl = this.self.scene['Gamecontrol'];
 
-        this.gameControl.adaptiveOther(this.self);
         this.background.width = Laya.stage.width;
         this.background.height = Laya.stage.height;
+        this.gameControl.childAdaptive(this.background, this.self, this.background.y);
+        this.gameControl.adaptiveOther(this.self);
 
         this.appear();
+
+    }
+
+    onAwake() {
+        console.log('排行榜');
+        if (Laya.Browser.onMiniGame) {
+            let wx: any = Laya.Browser.window.wx;
+            let openDataContext: any = wx.getOpenDataContext();
+            openDataContext.postMessage({ action: 'ranking' });
+        }
     }
 
     /**出现*/
@@ -42,6 +53,17 @@ export default class Ranking extends Laya.Script {
         let time = 300;
         Laya.Tween.to(this.background, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
             this.self.removeSelf();
+            // 发送排行榜关闭的消息
+            if (Laya.Browser.onMiniGame) {
+                let wx: any = Laya.Browser.window.wx;
+                let openDataContext: any = wx.getOpenDataContext();
+                openDataContext.postMessage({ action: 'close' });
+            }
+            // 显示bannar广告
+            if (Laya.Browser.onMiniGame) {
+                this.gameControl.bannerAd.show()
+                    .then(() => console.log('banner 广告显示'));
+            }
         }), 0);
         Laya.Tween.to(this.baseboard, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
         }), 0);

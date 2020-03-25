@@ -68,6 +68,7 @@
            this.videoAdOnClose = false;
            this.videoAdLode();
            this.bannerAdLode();
+           this.wxPostInit();
        }
        videoAdLode() {
            if (Laya.Browser.onMiniGame) {
@@ -83,8 +84,15 @@
                this.videoAd.onClose(res => {
                    if (res && res.isEnded || res === undefined) {
                        this.startNode['GameOVer'].startVanish('adv');
+                       if (Laya.Browser.onMiniGame) {
+                           this.bannerAd.hide();
+                       }
                    }
                    else {
+                       if (Laya.Browser.onMiniGame) {
+                           this.bannerAd.show()
+                               .then(() => console.log('banner 广告显示'));
+                       }
                        console.log('视频没有看望不会开始游戏');
                    }
                });
@@ -126,6 +134,7 @@
            this.timeCard.y = location;
            this.timeCard.alpha = 0;
            this.cardParent.y = stageHeight * 0.22;
+           this.cardAndParentAdaptive();
        }
        replacementCard(type) {
            if (type === 'start') {
@@ -176,8 +185,13 @@
            Laya.Tween.to(this.line, { alpha: 1 }, time, null, Laya.Handler.create(this, function () {
            }), delayed * 3);
        }
+       cardAndParentAdaptive() {
+           this.cardSpacingY = 5;
+           let remainingW = this.self.height - this.cardParent.y - this.self.height * 0.05;
+           let cardSpace = remainingW / 7;
+           this.cardHeight = cardSpace - this.cardSpacingY;
+       }
        cardCollection() {
-           let spacingY = 5;
            let startX1 = this.cardParent.width / 4;
            let startX2 = this.cardParent.width * 3 / 4;
            let len = 14;
@@ -194,14 +208,17 @@
                }
                card.y = 1500;
                card.zOrder = Math.floor(Math.random() * 30);
+               card.height = this.cardHeight;
+               card['DigitalCard'].board.height = this.cardHeight;
+               card['DigitalCard'].number.y = this.cardHeight / 2;
                let tagetY;
                if (j % 2 === 0) {
                    card.x = startX1;
-                   tagetY = j / 2 * (card.height + spacingY) + 80;
+                   tagetY = j / 2 * (card.height + this.cardSpacingY) + 80;
                }
                else {
                    card.x = startX2;
-                   tagetY = (j - 1) / 2 * (card.height + spacingY) + 80;
+                   tagetY = (j - 1) / 2 * (card.height + this.cardSpacingY) + 80;
                }
                card.rotation = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
                let time = 500;
@@ -232,7 +249,7 @@
                else {
                    Laya.timer.once(i * 50, this, function () {
                        let rotate = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
-                       Laya.Tween.to(card, { y: 1500, alpha: 0, rotation: rotate }, 800, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+                       Laya.Tween.to(card, { y: 1800, alpha: 0, rotation: rotate }, 800, null, Laya.Handler.create(this, function () {
                            if (type === 'nextLevel') {
                                if (i === len - 1) {
                                    this.cardParent.removeChildren(0, len - 1);
@@ -253,7 +270,7 @@
                        Laya.Tween.to(card, { scaleY: 0 }, 120, null, Laya.Handler.create(this, function () {
                            card['DigitalCard'].number.alpha = 1;
                            Laya.Tween.to(card, { scaleY: 1 }, 120, null, Laya.Handler.create(this, function () {
-                               Laya.Tween.to(card, { y: 1500, alpha: 0, rotation: Math.floor(Math.random() * 2) === 1 ? 30 : -30 }, 1300, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
+                               Laya.Tween.to(card, { y: 1800, alpha: 0, rotation: Math.floor(Math.random() * 2) === 1 ? 30 : -30 }, 1400, null, Laya.Handler.create(this, function () {
                                    this.cardParent.removeChildren(0, len - 1);
                                    this.createGameOver();
                                }), 100);
@@ -310,13 +327,56 @@
        createRanking() {
            let ranking = Laya.Pool.getItemByCreateFun('ranking', this.ranking.create, this.ranking);
            this.self.addChild(ranking);
+           if (Laya.Browser.onMiniGame) {
+               this.bannerAd.hide();
+           }
        }
        adaptiveOther(self) {
            self.width = 750;
-           self.height = Laya.stage.height;
-           self.pivotX = this.self.width / 2;
-           self.pivotY = this.self.height / 2;
+           self.pivotX = self.width / 2;
+           self.pivotY = self.height / 2;
            self.pos(375, Laya.stage.height / 2);
+       }
+       childAdaptive(child, parent, locationY) {
+           child.y = locationY - (Laya.stage.height / 2 - parent.height / 2);
+       }
+       wxPostInit() {
+           if (Laya.Browser.onMiniGame) {
+               Laya.loader.load(["res/atlas/rank.atlas"], Laya.Handler.create(null, function () {
+                   Laya.MiniAdpter.sendAtlasToOpenDataContext("res/atlas/rank.atlas");
+                   let wx = Laya.Browser.window.wx;
+                   let openDataContext = wx.getOpenDataContext();
+                   openDataContext.postMessage({ action: 'init' });
+               }));
+           }
+       }
+       wxPostData() {
+           if (Laya.Browser.onMiniGame) {
+               let args = {
+                   type: 'scores', data: { scores: this.levelsNum.value }
+               };
+               let wx = Laya.Browser.window.wx;
+               let openDataContext = wx.getOpenDataContext();
+               openDataContext.postMessage(args);
+               console.log('上传了');
+           }
+           else {
+               console.log('没有上传');
+           }
+       }
+       wxShare() {
+           if (Laya.Browser.onMiniGame) {
+               let wx = Laya.Browser.window.wx;
+               wx.shareAppMessage({
+                   title: '数字找茬',
+                   imageUrlId: 'CRYATpcgSFGkeB4Hs75jOQ',
+                   imageUrl: 'https://mmocgame.qpic.cn/wechatgame/9zdKibmXJ3RsmFpXn6UAV4ScT8ulA4wzqUUNicKWDIaODZbuv38lkBBOBQv8XbxOI0/0'
+               });
+               console.log("主动进行了转发");
+           }
+           else {
+               console.log("仅支持微信客户端");
+           }
        }
        onUpdate() {
            if (this.timerSwitch) {
@@ -459,6 +519,7 @@
            this.logoChange = 'appear';
            this.gameControl.adaptiveOther(this.self);
            this.appaer();
+           this.gameControl.wxPostData();
        }
        appaer() {
            let firstY = 1800;
@@ -494,9 +555,6 @@
            this.levelsNode['LevelsNode'].levelsNodeAni('common', 100);
            Laya.Tween.to(this.indicateCard, { alpha: 0 }, time * 2, null, Laya.Handler.create(this, function () {
                this.clicksOnBtn();
-               if (Laya.Browser.onMiniGame) {
-                   this.gameControl.bannerAd.show();
-               }
            }), 60);
            Laya.Tween.to(this.timeCard, { alpha: 0 }, time * 2, null, Laya.Handler.create(this, function () {
            }), 30);
@@ -610,10 +668,19 @@
            this.self = this.owner;
            this.self['GameOVer'] = this;
            this.gameControl = this.self.scene['Gamecontrol'];
-           this.gameControl.adaptiveOther(this.self);
            this.background.width = Laya.stage.width;
            this.background.height = Laya.stage.height;
+           this.gameControl.childAdaptive(this.background, this.self, this.background.y);
+           this.gameControl.adaptiveOther(this.self);
            this.appear();
+       }
+       onAwake() {
+           console.log('排行榜');
+           if (Laya.Browser.onMiniGame) {
+               let wx = Laya.Browser.window.wx;
+               let openDataContext = wx.getOpenDataContext();
+               openDataContext.postMessage({ action: 'ranking' });
+           }
        }
        appear() {
            this.background.alpha = 0.3;
@@ -629,6 +696,15 @@
            let time = 300;
            Laya.Tween.to(this.background, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
                this.self.removeSelf();
+               if (Laya.Browser.onMiniGame) {
+                   let wx = Laya.Browser.window.wx;
+                   let openDataContext = wx.getOpenDataContext();
+                   openDataContext.postMessage({ action: 'close' });
+               }
+               if (Laya.Browser.onMiniGame) {
+                   this.gameControl.bannerAd.show()
+                       .then(() => console.log('banner 广告显示'));
+               }
            }), 0);
            Laya.Tween.to(this.baseboard, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
            }), 0);
@@ -693,7 +769,7 @@
            this.btn_ranking.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
            this.btn_share.y = firstY;
            this.btn_share.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
-           this.anti_addiction.y = Laya.stage.height * 9 / 10;
+           this.gameControl.childAdaptive(this.anti_addiction, this.self, Laya.stage.height * 9 / 10);
            this.anti_addiction.alpha = 0;
            this.commonAppear(this.logo, 0, 416);
            this.commonAppear(this.btn_start, 1, 565);
@@ -813,7 +889,9 @@
            else if (event.currentTarget.name === 'btn_ranking') {
                this.gameControl.createRanking();
            }
-           else if (event.currentTarget.name === 'btn_share') ;
+           else if (event.currentTarget.name === 'btn_share') {
+               this.gameControl.wxShare();
+           }
        }
        out(event) {
            event.currentTarget.scale(1, 1);
@@ -866,7 +944,7 @@
    GameConfig.startScene = "Scene/MainScene.scene";
    GameConfig.sceneRoot = "";
    GameConfig.debug = false;
-   GameConfig.stat = true;
+   GameConfig.stat = false;
    GameConfig.physicsDebug = false;
    GameConfig.exportSceneToJson = true;
    GameConfig.init();
