@@ -1,5 +1,6 @@
 import GameControl from "./GameControl";
 import { NodeAni } from "./Frame/NodeAni";
+import { ButtonClicks } from "./Frame/ButtonClicks";
 export default class DigitalCard extends Laya.Script {
     /** @prop {name:board, tips:"数字底板", type:Node}*/
     public board: Laya.Image;
@@ -51,17 +52,11 @@ export default class DigitalCard extends Laya.Script {
     }
     /**开启点击事件*/
     cardClicksOn(): void {
-        this.self.on(Laya.Event.MOUSE_DOWN, this, this.down);
-        this.self.on(Laya.Event.MOUSE_MOVE, this, this.move);
-        this.self.on(Laya.Event.MOUSE_UP, this, this.up);
-        this.self.on(Laya.Event.MOUSE_OUT, this, this.out);
+        ButtonClicks.cardClicksOn(this.self, this, this.down, null, this.up, null);
     }
     /**关闭点击事件*/
     cardClicksOff(): void {
-        this.self.off(Laya.Event.MOUSE_DOWN, this, this.down);
-        this.self.off(Laya.Event.MOUSE_MOVE, this, this.move);
-        this.self.off(Laya.Event.MOUSE_UP, this, this.up);
-        this.self.off(Laya.Event.MOUSE_OUT, this, this.out);
+        ButtonClicks.cardClicksOff(this.self, this, this.down, null, this.up, null);
     }
     /**按下*/
     down(event): void {
@@ -72,11 +67,6 @@ export default class DigitalCard extends Laya.Script {
         } else {
             this.board.skin = 'UI/错误底板.png';
         }
-    }
-
-    /**移动*/
-    move(event): void {
-        event.currentTarget.scale(1, 1);
     }
     /**抬起*/
     up(event): void {
@@ -90,10 +80,6 @@ export default class DigitalCard extends Laya.Script {
         } else {
             this.cardVanish('error');
         }
-    }
-    /**出屏幕*/
-    out(event): void {
-        event.currentTarget.scale(1, 1);
     }
 
     onDisable(): void {

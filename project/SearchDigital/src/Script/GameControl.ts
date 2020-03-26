@@ -400,6 +400,7 @@ export default class GameControl extends Laya.Script {
             let card = this.cardParent._children[i] as Laya.Sprite;
             Laya.timer.once(i * 50, this, function () {
                 if (card['DigitalCard'].number.value === this.indicateNum.value) {
+                    card.zOrder = 1000;//层级放在最高位置
                     this.cardRotating(card, i);
                 } else {
                     let rotate = Math.floor(Math.random() * 2) === 1 ? 30 : -30;

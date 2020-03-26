@@ -241,6 +241,7 @@
                 let card = this.cardParent._children[i];
                 Laya.timer.once(i * 50, this, function () {
                     if (card['DigitalCard'].number.value === this.indicateNum.value) {
+                        card.zOrder = 1000;
                         this.cardRotating(card, i);
                     }
                     else {
@@ -472,7 +473,40 @@
         }
         NodeAni.fade_out = fade_out;
     })(NodeAni || (NodeAni = {}));
-    var NodeAni$1 = NodeAni;
+
+    var ButtonClicks;
+    (function (ButtonClicks) {
+        function cardClicksOn(target, caller, down, move, up, out) {
+            let buttonCommon = new ButtonCommon();
+            target.on(Laya.Event.MOUSE_DOWN, caller, down === null ? buttonCommon.down : down);
+            target.on(Laya.Event.MOUSE_MOVE, caller, move === null ? buttonCommon.move : move);
+            target.on(Laya.Event.MOUSE_UP, caller, up === null ? buttonCommon.up : up);
+            target.on(Laya.Event.MOUSE_OUT, caller, out === null ? buttonCommon.out : out);
+        }
+        ButtonClicks.cardClicksOn = cardClicksOn;
+        function cardClicksOff(target, caller, down, move, up, out) {
+            let buttonCommon = new ButtonCommon();
+            target.off(Laya.Event.MOUSE_DOWN, caller, down === null ? buttonCommon.down : down);
+            target.off(Laya.Event.MOUSE_MOVE, caller, move === null ? buttonCommon.move : move);
+            target.off(Laya.Event.MOUSE_UP, caller, up === null ? buttonCommon.up : up);
+            target.off(Laya.Event.MOUSE_OUT, caller, out === null ? buttonCommon.out : out);
+        }
+        ButtonClicks.cardClicksOff = cardClicksOff;
+    })(ButtonClicks || (ButtonClicks = {}));
+    class ButtonCommon {
+        down(event) {
+            event.currentTarget.scale(1.1, 1.1);
+        }
+        up(event) {
+            event.currentTarget.scale(1, 1);
+        }
+        move(event) {
+            event.currentTarget.scale(1.1, 1.1);
+        }
+        out(event) {
+            event.currentTarget.scale(1, 1);
+        }
+    }
 
     class DigitalCard extends Laya.Script {
         constructor() { super(); }
@@ -490,25 +524,19 @@
         }
         cardVanish(type) {
             if (type === 'right') {
-                NodeAni$1.rightAni(this.indicateCard, 50, 10, null);
-                NodeAni$1.rightAni(this.self, 50, 10, func => this.gameControl.clearAllCard_Next());
+                NodeAni.rightAni(this.indicateCard, 50, 10, null);
+                NodeAni.rightAni(this.self, 50, 10, func => this.gameControl.clearAllCard_Next());
             }
             else if (type === 'error') {
-                NodeAni$1.errorAni(this.indicateCard, 50, 10, null);
-                NodeAni$1.errorAni(this.self, 50, 10, func => this.gameControl.clearAllCard_Over());
+                NodeAni.errorAni(this.indicateCard, 50, 10, null);
+                NodeAni.errorAni(this.self, 50, 10, func => this.gameControl.clearAllCard_Over());
             }
         }
         cardClicksOn() {
-            this.self.on(Laya.Event.MOUSE_DOWN, this, this.down);
-            this.self.on(Laya.Event.MOUSE_MOVE, this, this.move);
-            this.self.on(Laya.Event.MOUSE_UP, this, this.up);
-            this.self.on(Laya.Event.MOUSE_OUT, this, this.out);
+            ButtonClicks.cardClicksOn(this.self, this, this.down, null, this.up, null);
         }
         cardClicksOff() {
-            this.self.off(Laya.Event.MOUSE_DOWN, this, this.down);
-            this.self.off(Laya.Event.MOUSE_MOVE, this, this.move);
-            this.self.off(Laya.Event.MOUSE_UP, this, this.up);
-            this.self.off(Laya.Event.MOUSE_OUT, this, this.out);
+            ButtonClicks.cardClicksOff(this.self, this, this.down, null, this.up, null);
         }
         down(event) {
             event.currentTarget.scale(1.1, 1.1);
@@ -519,9 +547,6 @@
             else {
                 this.board.skin = 'UI/错误底板.png';
             }
-        }
-        move(event) {
-            event.currentTarget.scale(1, 1);
         }
         up(event) {
             this.gameControl.timerSwitch = false;
@@ -534,9 +559,6 @@
             else {
                 this.cardVanish('error');
             }
-        }
-        out(event) {
-            event.currentTarget.scale(1, 1);
         }
         onDisable() {
         }
