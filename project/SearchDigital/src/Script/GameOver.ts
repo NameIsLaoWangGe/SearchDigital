@@ -1,4 +1,5 @@
-export default class GameOver extends Laya.Script {
+
+    export default class GameOver extends Laya.Script {
     /** @prop {name:logo, tips:"游戏结束标题", type:Node}*/
     public logo: Laya.Sprite;
 

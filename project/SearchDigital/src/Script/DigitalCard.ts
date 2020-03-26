@@ -1,12 +1,10 @@
 import GameControl from "./GameControl";
-import NodeAni from "./Animation/NodeAni";
+import { NodeAni } from "./Frame/NodeAni";
 export default class DigitalCard extends Laya.Script {
     /** @prop {name:board, tips:"数字底板", type:Node}*/
     public board: Laya.Image;
-
     /** @prop {name:number, tips:"具体数字", type:Node}*/
     public number: Laya.FontClip;
-
     /**指代this.ower*/
     private self: Laya.Sprite;
     /**主场景脚本*/
@@ -17,6 +15,9 @@ export default class DigitalCard extends Laya.Script {
     private indicateCard;
     /**关卡数*/
     private levels;
+
+    /**点击后的标记*/
+    private sign: boolean;
 
     constructor() { super(); }
 
@@ -30,8 +31,24 @@ export default class DigitalCard extends Laya.Script {
         // 数字随着长度而减小
         let scale = 1 - (this.levels - 1) * 0.04;
         this.number.scale(scale, scale);
+        this.board.skin = 'UI/数字底板.png';
+        this.sign = false;
     }
 
+
+    /**消失动画
+     * @param type 两个情况。一个是点错了，一个是对了，都会出现消失动画
+    */
+    cardVanish(type): void {
+        clearAllCard_Next => this.gameControl.clearAllCard_Next();
+        if (type === 'right') {
+            NodeAni.rightAni(this.indicateCard, 50, 10, null);
+            NodeAni.rightAni(this.self, 50, 10, func => this.gameControl.clearAllCard_Next());
+        } else if (type === 'error') {
+            NodeAni.errorAni(this.indicateCard, 50, 10, null);
+            NodeAni.errorAni(this.self, 50, 10, func => this.gameControl.clearAllCard_Over());
+        }
+    }
     /**开启点击事件*/
     cardClicksOn(): void {
         this.self.on(Laya.Event.MOUSE_DOWN, this, this.down);
@@ -46,36 +63,14 @@ export default class DigitalCard extends Laya.Script {
         this.self.off(Laya.Event.MOUSE_UP, this, this.up);
         this.self.off(Laya.Event.MOUSE_OUT, this, this.out);
     }
-
     /**按下*/
     down(event): void {
         event.currentTarget.scale(1.1, 1.1);
-    }
-
-    /**消失动画
-     * @param type 两个情况。一个是点错了，一个是对了，都会出现消失动画
-    */
-    cardVanish(type): void {
-        this.gameControl.clearAllClicks();
-        if (type === 'right') {
-            this.indicateCard['IndicateCard'].rightAni();
-            Laya.Tween.to(this.self, { y: this.self.y + 10 }, 50, null, Laya.Handler.create(this, function () {
-                Laya.Tween.to(this.self, { y: this.self.y - 20 }, 50, null, Laya.Handler.create(this, function () {
-                    Laya.Tween.to(this.self, { y: this.self.y + 10 }, 50, null, Laya.Handler.create(this, function () {
-                        this.gameControl.clearAllCard('nextLevel');
-                        this.self.removeSelf();
-                    }))
-                }))
-            }))
-        } else if (type === 'error') {
-            this.indicateCard['IndicateCard'].errorAni();
-            Laya.Tween.to(this.self, { x: this.self.x - 10 }, 50, null, Laya.Handler.create(this, function () {
-                Laya.Tween.to(this.self, { x: this.self.x + 20 }, 50, null, Laya.Handler.create(this, function () {
-                    Laya.Tween.to(this.self, { x: this.self.x - 10 }, 50, null, Laya.Handler.create(this, function () {
-                        this.gameControl.clearAllCard('gameOver');
-                    }))
-                }))
-            }))
+        let indicateNum = this.gameControl.indicateNum;
+        if (this.number.value === indicateNum.value) {
+            this.board.skin = 'UI/正确底板.png';
+        } else {
+            this.board.skin = 'UI/错误底板.png';
         }
     }
 

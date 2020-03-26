@@ -40,6 +40,7 @@ export default class StartGame extends Laya.Script {
     /**是否观看了视频*/
     private watchAds: boolean;
 
+
     constructor() { super(); }
 
     onEnable(): void {

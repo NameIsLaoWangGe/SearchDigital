@@ -41,10 +41,10 @@ P 01BAE7F5 vslider.png
 D UI
 R 64407641 +0123456789ks.png
 P FFB16BC1 logo.png
-P 88D397CB 任务.png
+P E8E6E40D 任务.png
 P ABBC029A 关卡数.png
 P 0AACBC29 分享按钮.png
-R FF72195E 分割线.png
+R 35E71E07 分割线.png
 P D6C12F94 分数图标.png
 P 395A07AF 失败字体.png
 P B47B8633 广告按钮.png
@@ -54,10 +54,12 @@ R 844CFD5F 排行栏.png
 P BE36F251 排行榜.png
 R 04A7AE81 排行榜底板.png
 R 9BA56D18 效果图.png
-P 8059AB54 数字内容.png
+P B1A6FF8D 数字底板.png
 P 6ACB1426 时间.png
+P 9E64A8B3 正确底板.png
 R C380A45A 背景图.png
 P 1C5B347E 返回按钮.png
 P 827BAC28 重来按钮.png
+P 5BCA5927 错误底板.png
 R 129BD0E2 防沉迷文字.png
 P 2668466B 黑色遮罩.png

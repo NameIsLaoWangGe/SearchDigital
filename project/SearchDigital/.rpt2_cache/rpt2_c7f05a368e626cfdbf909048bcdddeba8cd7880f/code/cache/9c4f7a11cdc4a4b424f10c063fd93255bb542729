@@ -1,0 +1,4 @@
+{
+  "code": "export default class TimeCard extends Laya.Sprite {\r\n    constructor() { super(); }\r\n    onEnable() {\r\n    }\r\n    timeCardNodeAin() {\r\n        let time = 120;\r\n        Laya.Tween.to(this.self, { scaleY: 0 }, time, null, Laya.Handler.create(this, function () {\r\n            Laya.Tween.to(this.self, { scaleY: 1 }, time, null, Laya.Handler.create(this, function () {\r\n                this.gameControl.cardCollection();\r\n            }), 0);\r\n        }), 0);\r\n    }\r\n    onDisable() {\r\n    }\r\n}\r\n",
+  "references": []
+}
