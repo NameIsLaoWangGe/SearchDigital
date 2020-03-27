@@ -1,3 +1,6 @@
+import { Clicks } from "./Template/Clicks";
+import { Animation } from "./Template/Animation";
+
 export default class StartGame extends Laya.Script {
     /** @prop {name:logo, tips:"游戏结束标题", type:Node}*/
     public logo: Laya.Sprite;
@@ -58,6 +61,8 @@ export default class StartGame extends Laya.Script {
         this.watchAds = false;
 
         this.gameControl.adaptiveOther(this.self);
+        this.gameControl.childAdaptive(this.anti_addiction, this.self, Laya.stage.height * 9 / 10);
+
 
         this.videoAd = this.gameControl.videoAd;
 
@@ -66,145 +71,81 @@ export default class StartGame extends Laya.Script {
 
     /**出现动画*/
     appaer(): void {
+        let time = 800;
+        let delayed = 150;
         let firstY = 1800;
-        this.logo.y = firstY;
-        this.logo.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
-
-        this.btn_start.y = firstY;
-        this.btn_start.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
-
-        this.btn_adv.y = firstY;
-        this.btn_adv.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
-
-        this.btn_ranking.y = firstY;
-        this.btn_ranking.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
-
-        this.btn_share.y = firstY;
-        this.btn_share.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
-
-        this.gameControl.childAdaptive(this.anti_addiction, this.self, Laya.stage.height * 9 / 10);
-        this.anti_addiction.alpha = 0;
-
-        this.commonAppear(this.logo, 0, 416);
-        this.commonAppear(this.btn_start, 1, 565);
-        this.commonAppear(this.btn_adv, 2, 667);
-        this.commonAppear(this.btn_ranking, 3, 877);
-        this.commonAppear(this.btn_share, 4, 877);
-        Laya.Tween.to(this.anti_addiction, { alpha: 1 }, 1000, null, Laya.Handler.create(this, function () {
-        }));
+        // logo上升
+        Animation.go_up(this.logo, firstY, Math.floor(Math.random() * 2) === 1 ? 45 : -45, 416, time, 0, null);
+        // 开始按钮上升
+        Animation.go_up(this.btn_start, firstY, Math.floor(Math.random() * 2) === 1 ? 45 : -45, 565, time, delayed * 1, null);
+        // 开始按钮上升
+        Animation.go_up(this.btn_adv, firstY, Math.floor(Math.random() * 2) === 1 ? 45 : -45, 667, time, delayed * 2, null);
+        // 排行按钮上升
+        Animation.go_up(this.btn_ranking, firstY, Math.floor(Math.random() * 2) === 1 ? 45 : -45, 877, time, delayed * 3, null);
+        // 分享按钮上升
+        Animation.go_up(this.btn_share, firstY, Math.floor(Math.random() * 2) === 1 ? 45 : -45, 877, time, delayed * 4, func => this.appaerFunc());
+        // 分割线出现
+        Animation.fade_out(this.anti_addiction, 0, 1, 1000, 0, null);
     }
 
-    /**通用出现动画*/
-    commonAppear(node, number, targetY): void {
-        let delayed = 80;
-        let time = 600;
-        Laya.Tween.to(node, { y: targetY, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
-            if (number === 4) {
-                this.startSwitch = true;
-                this.clicksOnBtn();
-                // 显示bannar广告
-                if (Laya.Browser.onMiniGame) {
-                    this.gameControl.bannerAd.show()
-                        .then(() => console.log('banner 广告显示'));
-                }
-            }
-        }), number * delayed);
+    /**出现动画回调函数*/
+    appaerFunc(): void {
+        this.startSwitch = true;
+        this.clicksOnBtn();
+        // 显示bannar广告
+        if (Laya.Browser.onMiniGame) {
+            this.gameControl.bannerAd.show()
+                .then(() => console.log('banner 广告显示'));
+        }
     }
 
-    /**消失动画
+    /**
+     * 消失动画
      * 一种是普通开始
      * 一种是看广告开始
-     *@param  type 
+     * @param  type 消失后的开始游戏类型
     */
-    startVanish(type): void {
-        Laya.Tween.to(this.anti_addiction, { alpha: 0 }, 300, null, Laya.Handler.create(this, function () {
-        }));
-        this.commonVanish(this.logo, 0, Math.floor(Math.random() * 2) === 1 ? 30 : -30);
-        this.commonVanish(this.btn_start, 1, Math.floor(Math.random() * 2) === 1 ? 30 : -30);
-        this.commonVanish(this.btn_adv, 2, Math.floor(Math.random() * 2) === 1 ? 30 : -30);
-        this.commonVanish(this.btn_ranking, 3, Math.floor(Math.random() * 2) === 1 ? 30 : -30);
-        // 有类型的单独拿出来
+    vanish(type): void {
         let time = 600;
-        let delayed = 150;
-        Laya.Tween.to(this.btn_share, { y: 1800, rotation: Math.floor(Math.random() * 2) === 1 ? 30 : -30 }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
-            this.self.removeSelf();
-            this.gameControl.otherAppear();
-            this.gameControl.replacementCard(type);
-        }), 4 * 150);
+        let y = 1800;
+        let delayed = 50;
+        // logo下落
+        Animation.drop(this.logo, y, Math.floor(Math.random() * 2) === 1 ? 30 : -30, time, delayed * 0, null);
+        // 开始按钮下落
+        Animation.drop(this.btn_start, y, Math.floor(Math.random() * 2) === 1 ? 30 : -30, time, delayed * 1, null);
+        // 看广告开始按钮下落
+        Animation.drop(this.btn_adv, y, Math.floor(Math.random() * 2) === 1 ? 30 : -30, time, delayed * 2, null);
+        // 排行榜按钮下落
+        Animation.drop(this.btn_ranking, y, Math.floor(Math.random() * 2) === 1 ? 30 : -30, time, delayed * 3, null);
+        // 分享按钮下落
+        Animation.drop(this.btn_share, y, Math.floor(Math.random() * 2) === 1 ? 30 : -30, time, delayed * 5, func => this.vanishFunc(type));
+        // 分割线消失
+        Animation.fade_out(this.anti_addiction, 1, 0, 300, 0, null);
     }
 
-    /**通用消失动画*/
-    commonVanish(node, number, rotation): void {
-        let time = 600;
-        let delayed = 150;
-        Laya.Tween.to(node, { y: 1800, rotation: rotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
-            if (number === 4) {
-                this.self.removeSelf();
-                this.gameControl.otherAppear();
-                if (this.watchAds) {
-                    this.gameControl.replacementCard('adv');
-                } else {
-                    this.gameControl.replacementCard('start');
-                }
-            }
-        }), number * delayed);
+    /**
+     * 动画播放完毕后开始游戏
+    */
+    vanishFunc(type): void {
+        this.self.removeSelf();
+        this.gameControl.otherAppear();
+        this.gameControl.replacementCard(type);
     }
 
     /**按钮的点击事件*/
     clicksOnBtn(): void {
-        this.btn_start.on(Laya.Event.MOUSE_DOWN, this, this.down);
-        this.btn_start.on(Laya.Event.MOUSE_MOVE, this, this.move);
-        this.btn_start.on(Laya.Event.MOUSE_UP, this, this.up);
-        this.btn_start.on(Laya.Event.MOUSE_OUT, this, this.out);
-
-        this.btn_adv.on(Laya.Event.MOUSE_DOWN, this, this.down);
-        this.btn_adv.on(Laya.Event.MOUSE_MOVE, this, this.move);
-        this.btn_adv.on(Laya.Event.MOUSE_UP, this, this.up);
-        this.btn_adv.on(Laya.Event.MOUSE_OUT, this, this.out);
-
-        this.btn_ranking.on(Laya.Event.MOUSE_DOWN, this, this.down);
-        this.btn_ranking.on(Laya.Event.MOUSE_MOVE, this, this.move);
-        this.btn_ranking.on(Laya.Event.MOUSE_UP, this, this.up);
-        this.btn_ranking.on(Laya.Event.MOUSE_OUT, this, this.out);
-
-        this.btn_share.on(Laya.Event.MOUSE_DOWN, this, this.down);
-        this.btn_share.on(Laya.Event.MOUSE_MOVE, this, this.move);
-        this.btn_share.on(Laya.Event.MOUSE_UP, this, this.up);
-        this.btn_share.on(Laya.Event.MOUSE_OUT, this, this.out);
+        Clicks.clicksOn('largen', this.btn_start, this, null, null, this.up, null);
+        Clicks.clicksOn('largen', this.btn_adv, this, null, null, this.up, null);
+        Clicks.clicksOn('largen', this.btn_ranking, this, null, null, this.up, null);
+        Clicks.clicksOn('largen', this.btn_share, this, null, null, this.up, null);
     }
 
-    /**两个按钮的点击事件*/
+    /**关闭按钮点击事件*/
     clicksOffBtn(): void {
-        this.btn_start.off(Laya.Event.MOUSE_DOWN, this, this.down);
-        this.btn_start.off(Laya.Event.MOUSE_MOVE, this, this.move);
-        this.btn_start.off(Laya.Event.MOUSE_UP, this, this.up);
-        this.btn_start.off(Laya.Event.MOUSE_OUT, this, this.out);
-
-        this.btn_adv.off(Laya.Event.MOUSE_DOWN, this, this.down);
-        this.btn_adv.off(Laya.Event.MOUSE_MOVE, this, this.move);
-        this.btn_adv.off(Laya.Event.MOUSE_UP, this, this.up);
-        this.btn_adv.off(Laya.Event.MOUSE_OUT, this, this.out);
-
-        this.btn_ranking.off(Laya.Event.MOUSE_DOWN, this, this.down);
-        this.btn_ranking.off(Laya.Event.MOUSE_MOVE, this, this.move);
-        this.btn_ranking.off(Laya.Event.MOUSE_UP, this, this.up);
-        this.btn_ranking.off(Laya.Event.MOUSE_OUT, this, this.out);
-
-        this.btn_share.off(Laya.Event.MOUSE_DOWN, this, this.down);
-        this.btn_share.off(Laya.Event.MOUSE_MOVE, this, this.move);
-        this.btn_share.off(Laya.Event.MOUSE_UP, this, this.up);
-        this.btn_share.off(Laya.Event.MOUSE_OUT, this, this.out);
-    }
-
-    /**按下*/
-    down(event): void {
-        event.currentTarget.scale(1.1, 1.1);
-
-    }
-    /**移动*/
-    move(event): void {
-        event.currentTarget.scale(1, 1);
-
+        Clicks.clicksOff('largen', this.btn_start, this, null, null, this.up, null);
+        Clicks.clicksOff('largen', this.btn_adv, this, null, null, this.up, null);
+        Clicks.clicksOff('largen', this.btn_ranking, this, null, null, this.up, null);
+        Clicks.clicksOff('largen', this.btn_share, this, null, null, this.up, null);
     }
 
     /**抬起*/
@@ -215,7 +156,7 @@ export default class StartGame extends Laya.Script {
             if (Laya.Browser.onMiniGame) {
                 this.gameControl.bannerAd.hide();
             }
-            this.startVanish('start');
+            this.vanish('start');
             this.clicksOffBtn();
         } else if (event.currentTarget.name === 'btn_adv') {
             // 关闭bannar广告
@@ -237,10 +178,6 @@ export default class StartGame extends Laya.Script {
         } else if (event.currentTarget.name === 'btn_share') {
             this.gameControl.wxShare();
         }
-    }
-    /**出屏幕*/
-    out(event): void {
-        event.currentTarget.scale(1, 1);
     }
 
     onUpdate(): void {

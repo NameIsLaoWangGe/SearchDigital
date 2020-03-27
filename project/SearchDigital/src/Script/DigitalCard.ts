@@ -1,6 +1,6 @@
 import GameControl from "./GameControl";
-import { NodeAni } from "./Frame/NodeAni";
-import { ButtonClicks } from "./Frame/ButtonClicks";
+import { Animation } from "./Template/Animation";
+import { Clicks } from "./Template/Clicks";
 export default class DigitalCard extends Laya.Script {
     /** @prop {name:board, tips:"数字底板", type:Node}*/
     public board: Laya.Image;
@@ -36,27 +36,27 @@ export default class DigitalCard extends Laya.Script {
         this.sign = false;
     }
 
-
     /**消失动画
      * @param type 两个情况。一个是点错了，一个是对了，都会出现消失动画
     */
     cardVanish(type): void {
         clearAllCard_Next => this.gameControl.clearAllCard_Next();
         if (type === 'right') {
-            NodeAni.rightAni(this.indicateCard, 50, 10, null);
-            NodeAni.rightAni(this.self, 50, 10, func => this.gameControl.clearAllCard_Next());
+            Animation.leftRight_Shake(this.indicateCard, 50, 10, null);
+            Animation.leftRight_Shake(this.self, 50, 10, func => this.gameControl.clearAllCard_Next());
         } else if (type === 'error') {
-            NodeAni.errorAni(this.indicateCard, 50, 10, null);
-            NodeAni.errorAni(this.self, 50, 10, func => this.gameControl.clearAllCard_Over());
+            Animation.upDwon_Shake(this.indicateCard, 50, 10, null);
+            Animation.upDwon_Shake(this.self, 50, 10, func => this.gameControl.clearAllCard_Over());
         }
     }
+
     /**开启点击事件*/
     cardClicksOn(): void {
-        ButtonClicks.cardClicksOn(this.self, this, this.down, null, this.up, null);
+        Clicks.clicksOn('largen', this.self, this, this.down, null, this.up, null);
     }
     /**关闭点击事件*/
     cardClicksOff(): void {
-        ButtonClicks.cardClicksOff(this.self, this, this.down, null, this.up, null);
+        Clicks.clicksOff('largen', this.self, this, this.down, null, this.up, null);
     }
     /**按下*/
     down(event): void {

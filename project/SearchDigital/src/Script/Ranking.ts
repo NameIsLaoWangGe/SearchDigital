@@ -1,3 +1,6 @@
+import { Clicks } from "./Template/Clicks";
+import { Animation } from "./Template/Animation";
+
 export default class Ranking extends Laya.Script {
     /** @prop {name:background, tips:"黑色背景图", type:Node}*/
     public background: Laya.Sprite;
@@ -20,9 +23,7 @@ export default class Ranking extends Laya.Script {
         this.background.height = Laya.stage.height;
         this.gameControl.childAdaptive(this.background, this.self, this.background.y);
         this.gameControl.adaptiveOther(this.self);
-
         this.appear();
-
     }
 
     onAwake() {
@@ -36,74 +37,52 @@ export default class Ranking extends Laya.Script {
 
     /**出现*/
     appear(): void {
-        this.background.alpha = 0.3;
-        this.baseboard.alpha = 0;
         let time = 300;
-        Laya.Tween.to(this.background, { alpha: 0.3 }, time, null, Laya.Handler.create(this, function () {
-
-        }), 0);
-        Laya.Tween.to(this.baseboard, { alpha: 1 }, time, null, Laya.Handler.create(this, function () {
-            this.clicksOnBtn();
-        }), 0);
-
+        //背景出现
+        Animation.fade_out(this.background, 0, 0.3, time, 0, null);
+        //底板出现
+        Animation.fade_out(this.baseboard, 0, 1, time, 0, func => this.clicksOnBtn());
     }
 
     /**消失*/
     vanish(): void {
         let time = 300;
-        Laya.Tween.to(this.background, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
-            this.self.removeSelf();
-            // 发送排行榜关闭的消息
-            if (Laya.Browser.onMiniGame) {
-                let wx: any = Laya.Browser.window.wx;
-                let openDataContext: any = wx.getOpenDataContext();
-                openDataContext.postMessage({ action: 'close' });
-            }
-            // 显示bannar广告
-            if (Laya.Browser.onMiniGame) {
-                this.gameControl.bannerAd.show()
-                    .then(() => console.log('banner 广告显示'));
-            }
-        }), 0);
-        Laya.Tween.to(this.baseboard, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
-        }), 0);
+        //背景出现
+        Animation.fade_out(this.background, 0.3, 0, time, 0, func => this.vanishFunc());
+        //底板出现
+        Animation.fade_out(this.baseboard, 1, 0, time, 0, null);
+    }
+
+    /**消失动画回调*/
+    vanishFunc(): void {
+        this.self.removeSelf();
+        // 发送排行榜关闭的消息
+        if (Laya.Browser.onMiniGame) {
+            let wx: any = Laya.Browser.window.wx;
+            let openDataContext: any = wx.getOpenDataContext();
+            openDataContext.postMessage({ action: 'close' });
+        }
+        // 显示bannar广告
+        if (Laya.Browser.onMiniGame) {
+            this.gameControl.bannerAd.show()
+                .then(() => console.log('banner 广告显示'));
+        }
     }
 
     /**两个按钮的点击事件*/
     clicksOnBtn(): void {
-        this.background.on(Laya.Event.MOUSE_DOWN, this, this.down);
-        this.background.on(Laya.Event.MOUSE_MOVE, this, this.move);
-        this.background.on(Laya.Event.MOUSE_UP, this, this.up);
-        this.background.on(Laya.Event.MOUSE_OUT, this, this.out);
+        Clicks.clicksOn('largen', this.background, this, null, null, this.up, null);
     }
 
     /**两个按钮的点击事件*/
     clicksOffBtn(): void {
-        this.background.off(Laya.Event.MOUSE_DOWN, this, this.down);
-        this.background.off(Laya.Event.MOUSE_MOVE, this, this.move);
-        this.background.off(Laya.Event.MOUSE_UP, this, this.up);
-        this.background.off(Laya.Event.MOUSE_OUT, this, this.out);
-    }
-
-    /**按下*/
-    down(event): void {
-        event.currentTarget.scale(1.1, 1.1);
-
-    }
-    /**移动*/
-    move(event): void {
-        event.currentTarget.scale(1, 1);
-
+        Clicks.clicksOff('largen', this.background, this, null, null, this.up, null);
     }
     /**抬起*/
     up(event): void {
         event.currentTarget.scale(1, 1);
         this.vanish();
         console.log('我点击了背景！');
-    }
-    /**出屏幕*/
-    out(event): void {
-        event.currentTarget.scale(1, 1);
     }
 
     onDisable(): void {

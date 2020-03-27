@@ -1,5 +1,7 @@
+import { Animation } from "./Template/Animation";
+import { Clicks } from "./Template/Clicks";
 
-    export default class GameOver extends Laya.Script {
+export default class GameOver extends Laya.Script {
     /** @prop {name:logo, tips:"游戏结束标题", type:Node}*/
     public logo: Laya.Sprite;
 
@@ -48,174 +50,107 @@
     /**出现动画*/
     appaer(): void {
         let firstY = 1800;
-        this.logo.y = firstY;
-        this.logo.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
-
-        this.btn_again.y = firstY;
-        this.btn_again.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
-
-        this.btn_return.y = firstY;
-        this.btn_return.rotation = Math.floor(Math.random() * 2) === 1 ? 45 : -45;
-
-        this.commonAppear(this.logo, 0, 644);
-        this.commonAppear(this.btn_again, 1, 790);
-        this.commonAppear(this.btn_return, 2, 790);
-    }
-
-    /**通过出现动画*/
-    commonAppear(node, number, targetY): void {
-        let time = 500;
-        let delayed = 150
-        Laya.Tween.to(node, { y: targetY, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
-            if (number === 0) {
-                this.levelsGameOver();
-            }
-        }), number * delayed);
+        let time = 800;
+        let delayed = 150;
+        Animation.go_up(this.logo, firstY, Math.floor(Math.random() * 2) === 1 ? 45 : -45, 644, time, 0, null);
+        Animation.go_up(this.btn_again, firstY, Math.floor(Math.random() * 2) === 1 ? 45 : -45, 790, time, delayed, null);
+        Animation.go_up(this.btn_return, firstY, Math.floor(Math.random() * 2) === 1 ? 45 : -45, 790, time, delayed * 2, func => this.levelsCardAni());
     }
 
     /**关卡卡牌移动到中间做为最终分数*/
-    levelsGameOver(): void {
+    levelsCardAni(): void {
         let time = 200;
         // 关卡节点动画
         let targetX = Laya.stage.width / 2;
         let targetY = this.logo.y + (this.self.y - this.self.height / 2) - 150;//y在logo的世界坐标-100的位置
-        let Pre = 1 / 2;//这个是路线上的一个点站到整体的百分比
-        Laya.Tween.to(this.levelsNode, { x: targetX * Pre, y: targetY * Pre, rotation: 45 }, time, null, Laya.Handler.create(this, function () {
-            Laya.Tween.to(this.levelsNode, { x: targetX, y: targetY, rotation: 0, }, time, null, Laya.Handler.create(this, function () {
-                this.logoSwitch = true;
-            }), 0);
-        }), 30);
+        Animation.move_changeRotate(this.levelsNode, targetX, targetY, 0.5, 45, time, func => this.logoSwitch = true);
+        Animation.cardRotateX_TowFace(this.levelsNode, ['levelsNum'], null, 100, 0, null);
 
-        this.levelsNode['LevelsNode'].levelsNodeAni('common', 100);//这个是旋转动画
-
-        // 提示卡牌动画
-        Laya.Tween.to(this.indicateCard, { alpha: 0 }, time * 2, null, Laya.Handler.create(this, function () {
-            this.clicksOnBtn();
-            // // 开启bannar广告
-            // if (Laya.Browser.onMiniGame) {
-            //     this.gameControl.bannerAd.show();
-            // }
-        }), 60);
-
-        // 时间节点动画
-        Laya.Tween.to(this.timeCard, { alpha: 0 }, time * 2, null, Laya.Handler.create(this, function () {
-        }), 30);
-
-        // 分割线动画
-        Laya.Tween.to(this.line, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
-        }), 0);
-
+        // 提示卡牌隐藏动画
+        Animation.fade_out(this.indicateCard, 1, 0, time * 2, 60, func => this.clicksOnBtn());
+        // 时间节点隐藏动画
+        Animation.fade_out(this.timeCard, 1, 0, time * 2, 30, null);
+        // 分割线隐藏动画
+        Animation.fade_out(this.line, 1, 0, time * 2, 0, null);
     }
 
-    /**关卡卡牌移动到中间做为最终分数]
-     * 一种是重来消失
-     * 一种是返回主界面消失
+    /**
+      * 功能节点显示
+     * 一种是重来显示
+     * 一种是返回主界面显示
      * @param type
     */
-    homing(type): void {
+    nodeDisplay(type): void {
         let time = 250;
         // 关卡节点动画
-        let targetX = 108;//排好的位置不变
-        let targetY = this.indicateCard.y;//y轴和时间、提示卡牌位置一样
-        let Pre = 1 / 2;//这个是路线上的一个点站到整体的百分比\
-        Laya.Tween.to(this.levelsNode, { x: this.levelsNode.x - targetX - 20, y: this.levelsNode.y - targetY, rotation: -45 }, time, null, Laya.Handler.create(this, function () {
-            Laya.Tween.to(this.levelsNode, { x: targetX, y: targetY, rotation: 0 }, time, null, Laya.Handler.create(this, function () {
-            }), 0);
-        }), 0);
-
-        this.levelsNode['LevelsNode'].levelsNodeAni('common', 100);//这个是旋转动画
+        let targetX = 108;//原位置
+        let targetY = this.indicateCard.y;//转换为当前self坐标系坐标
+        Animation.move_changeRotate(this.levelsNode, targetX, targetY, 0.5, -45, time, null);
+        Animation.cardRotateX_TowFace(this.levelsNode, ['levelsNum'], null, 100, 0, null);
 
         // 提示卡牌动画
-        Laya.Tween.to(this.indicateCard, { alpha: 1 }, time * 2, null, Laya.Handler.create(this, function () {
-        }), 100);
-
+        Animation.fade_out(this.indicateCard, 0, 1, time * 2, 100, null);
         // 时间节点动画
-        Laya.Tween.to(this.timeCard, { alpha: 1 }, time * 2, null, Laya.Handler.create(this, function () {
-        }), 200);
+        Animation.fade_out(this.timeCard, 0, 1, time * 2, 200, null);
         // 分割线动画
-        Laya.Tween.to(this.line, { alpha: 1 }, time, null, Laya.Handler.create(this, function () {
-            if (type === 'again') {
-                this.gameControl.replacementCard('reStart');
-            } else if (type === 'return') {
-                this.gameControl.createStartGame();
-                this.gameControl.otherVanish();
-            }
-
-        }), 500);
+        Animation.fade_out(this.line, 0, 1, time * 2, 500, func => this.nodeDisplayFunc(type));
     }
 
-    /**消失动画
+    /**
+     * 功能节点显示回调
+     * @param type 包括重来和返回主界面
+     * */
+    nodeDisplayFunc(type): void {
+        if (type === 'again') {
+            this.gameControl.replacementCard('reStart');
+        } else if (type === 'return') {
+            this.gameControl.createStartGame();
+            this.gameControl.otherVanish();
+        }
+    }
+
+    /** 
+     * 界面元素下落消失动画
      * 一种是重来消失
      * 一种是返回主界面消失
      * @param type
     */
     vanish(type): void {
-
-        let Lrotation = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
-        let Arotation = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
-        let Rrotation = Math.floor(Math.random() * 2) === 1 ? 30 : -30;
-
-        this.commonVanish(this.btn_again, 0, Math.floor(Math.random() * 2) === 1 ? 30 : -30);
-        this.commonVanish(this.btn_return, 1, Math.floor(Math.random() * 2) === 1 ? 30 : -30);
-
-        // 重来按钮动画
+        // 三个元素的下落动画
         let time = 800;
         let targetY = 1800;
-        Laya.Tween.to(this.logo, { y: targetY, rotation: Rrotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
-            // 关闭bannar广告
-            if (Laya.Browser.onMiniGame) {
-                this.gameControl.bannerAd.hide();
-            }
-            this.self.removeSelf();
-            this.homing(type);
-        }), 300);
-    }
-
-    /**通用消失动画*/
-    commonVanish(node, number, rotation): void {
-        let time = 800;
         let delayed = 150;
-        // logo 动画
-        Laya.Tween.to(node, { y: 1800, rotation: rotation }, time, Laya.Ease.expoIn, Laya.Handler.create(this, function () {
-        }), 0);
+        Animation.drop(this.btn_again, targetY, Math.floor(Math.random() * 2) === 1 ? 30 : -30, time, delayed * 0, null);
+        Animation.drop(this.btn_return, targetY, Math.floor(Math.random() * 2) === 1 ? 30 : -30, time, delayed * 1, null);
+        Animation.drop(this.logo, targetY, Math.floor(Math.random() * 2) === 1 ? 30 : -30, time, delayed * 2, func => this.vanishFunc(type));
+    }
+    /**
+     * 下落消失回调
+     * 一种是重来消失
+     * 一种是返回主界面消失
+     * @param type 
+     */
+    vanishFunc(type): void {
+        // 关闭bannar广告
+        if (Laya.Browser.onMiniGame) {
+            this.gameControl.bannerAd.hide();
+        }
+        this.self.removeSelf();
+        this.nodeDisplay(type);
     }
 
     /**两个按钮的点击事件*/
     clicksOnBtn(): void {
-        this.btn_again.on(Laya.Event.MOUSE_DOWN, this, this.down);
-        this.btn_again.on(Laya.Event.MOUSE_MOVE, this, this.move);
-        this.btn_again.on(Laya.Event.MOUSE_UP, this, this.up);
-        this.btn_again.on(Laya.Event.MOUSE_OUT, this, this.out);
-
-        this.btn_return.on(Laya.Event.MOUSE_DOWN, this, this.down);
-        this.btn_return.on(Laya.Event.MOUSE_MOVE, this, this.move);
-        this.btn_return.on(Laya.Event.MOUSE_UP, this, this.up);
-        this.btn_return.on(Laya.Event.MOUSE_OUT, this, this.out);
+        Clicks.clicksOn('largen', this.btn_again, this, null, null, this.up, null);
+        Clicks.clicksOn('largen', this.btn_return, this, null, null, this.up, null);
     }
 
     /**两个按钮的点击事件*/
     clicksOffBtn(): void {
-        this.btn_again.off(Laya.Event.MOUSE_DOWN, this, this.down);
-        this.btn_again.off(Laya.Event.MOUSE_MOVE, this, this.move);
-        this.btn_again.off(Laya.Event.MOUSE_UP, this, this.up);
-        this.btn_again.off(Laya.Event.MOUSE_OUT, this, this.out);
-
-        this.btn_return.off(Laya.Event.MOUSE_DOWN, this, this.down);
-        this.btn_return.off(Laya.Event.MOUSE_MOVE, this, this.move);
-        this.btn_return.off(Laya.Event.MOUSE_UP, this, this.up);
-        this.btn_return.off(Laya.Event.MOUSE_OUT, this, this.out);
+        Clicks.clicksOff('largen', this.btn_again, this, null, null, this.up, null);
+        Clicks.clicksOff('largen', this.btn_return, this, null, null, this.up, null);
     }
 
-    /**按下*/
-    down(event): void {
-        event.currentTarget.scale(1.1, 1.1);
-
-    }
-    /**移动*/
-    move(event): void {
-        event.currentTarget.scale(1, 1);
-
-    }
     /**抬起*/
     up(event): void {
         event.currentTarget.scale(1, 1);
@@ -225,10 +160,6 @@
         } else if (event.currentTarget.name === 'btn_return') {
             this.vanish('return');
         }
-    }
-    /**出屏幕*/
-    out(event): void {
-        event.currentTarget.scale(1, 1);
     }
 
     onUpdate(): void {

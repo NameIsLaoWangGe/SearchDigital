@@ -1,3 +1,5 @@
+import { Animation } from "./Template/Animation";
+
 export default class GameControl extends Laya.Script {
 
     /** @prop {name:indicateCard, tips:"提示牌", type:Node}*/
@@ -97,7 +99,7 @@ export default class GameControl extends Laya.Script {
                 // 小于 2.1.0 的基础库版本，res 是一个 undefined
                 if (res && res.isEnded || res === undefined) {
                     // 正常播放结束，可以下发游戏奖励
-                    this.startNode['GameOVer'].startVanish('adv');
+                    this.startNode['GameOVer'].vanish('adv');
 
                     // 关闭bannar广告
                     if (Laya.Browser.onMiniGame) {
@@ -204,33 +206,25 @@ export default class GameControl extends Laya.Script {
     otherRotate(type): void {
         let time = 120;
         // 等级卡牌旋转动画
-        Laya.Tween.to(this.levelsNode, { scaleX: 0 }, time, null, Laya.Handler.create(this, function () {
-            this.levelsNum.value = this.levels.toString();
-            Laya.Tween.to(this.levelsNode, { scaleX: 1 }, time, null, Laya.Handler.create(this, function () {
-                // 提示卡牌旋转动画
-                Laya.Tween.to(this.indicateCard, { scaleY: 0 }, time, null, Laya.Handler.create(this, function () {
-                    this.indicateNumReset();
-                    Laya.Tween.to(this.indicateCard, { scaleY: 1 }, time, null, Laya.Handler.create(this, function () {
-                        // 如果是下一关，那么时间节点不会旋转
-                        if (type === 'nextLevel') {
-                            this.cardCollection();
-                            return;
-                        }
-                        //时间卡牌旋转
-                        Laya.Tween.to(this.timeCard, { scaleX: 0 }, time, null, Laya.Handler.create(this, function () {
-                            if (type === 'start' || type === 'reStart') {
-                                this.timeNum.value = '30s';
-                            } else if (type === 'adv') {
-                                this.timeNum.value = '40s';
-                            }
-                            Laya.Tween.to(this.timeCard, { scaleX: 1 }, time, null, Laya.Handler.create(this, function () {
-                                this.cardCollection();
-                            }), 0);
-                        }), 0);
-                    }), 0);
-                }), 0);
-            }), 0);
-        }), 0);
+        Animation.cardRotateX_OneFace(this.levelsNode, func => this.levelsNum.value = this.levels.toString(), time, 0,
+            // 提示卡牌旋转动画
+            func => Animation.cardRotateY_OneFace(this.indicateCard, func => this.indicateCard, time, 0,
+                func => this.otherRotateFunc(type, time)));
+    }
+    /**节点变换回调*/
+    otherRotateFunc(type, time): void {
+        // 如果是下一关，那么时间节点不会旋转
+        if (type === 'nextLevel') {
+            this.cardCollection();
+            return;
+        }
+        Animation.cardRotateX_OneFace(this.timeCard, func => function () {
+            if (type === 'start' || type === 'reStart') {
+                this.timeNum.value = '30s';
+            } else if (type === 'adv') {
+                this.timeNum.value = '40s';
+            }
+        }, time, 0, func => this.cardCollection());
     }
 
     /**
@@ -268,13 +262,6 @@ export default class GameControl extends Laya.Script {
         Laya.Tween.to(this.line, { alpha: 0 }, time, null, Laya.Handler.create(this, function () {
         }), delayed * 3);
 
-        // NodeAni.fade_out(this.levelsNode, time, 0, delayed * 0, null);
-        // // 提示卡牌动画
-        // NodeAni.fade_out(this.indicateCard, time, 0, delayed * 1, null);
-        // // 时间节点动画
-        // NodeAni.fade_out(this.timeCard, time, 0, delayed * 2, null);
-        // // 分割线动画
-        // NodeAni.fade_out(this.line, time, 0, delayed * 3, null);
     }
 
     /**功能节点的消失动画*/
@@ -496,7 +483,6 @@ export default class GameControl extends Laya.Script {
     createRanking(): void {
         let ranking = Laya.Pool.getItemByCreateFun('ranking', this.ranking.create, this.ranking) as Laya.Sprite;
         this.self.addChild(ranking);
-
         // 关闭bannar广告
         if (Laya.Browser.onMiniGame) {
             this.bannerAd.hide();
