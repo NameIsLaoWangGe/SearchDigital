@@ -42,11 +42,11 @@ export default class DigitalCard extends Laya.Script {
     cardVanish(type): void {
         clearAllCard_Next => this.gameControl.clearAllCard_Next();
         if (type === 'right') {
-            Animation.leftRight_Shake(this.indicateCard, 50, 10, null);
-            Animation.leftRight_Shake(this.self, 50, 10, func => this.gameControl.clearAllCard_Next());
-        } else if (type === 'error') {
             Animation.upDwon_Shake(this.indicateCard, 50, 10, null);
-            Animation.upDwon_Shake(this.self, 50, 10, func => this.gameControl.clearAllCard_Over());
+            Animation.upDwon_Shake(this.self, 50, 10, func => this.gameControl.clearAllCard_Next());
+        } else if (type === 'error') {
+            Animation.leftRight_Shake(this.indicateCard, 50, 10, null);
+            Animation.leftRight_Shake(this.self, 50, 10, func => this.gameControl.clearAllCard_Over());
         }
     }
 
@@ -61,6 +61,7 @@ export default class DigitalCard extends Laya.Script {
     /**按下*/
     down(event): void {
         event.currentTarget.scale(1.1, 1.1);
+        this.self.zOrder = 100;//点击后的层级变为最高
         let indicateNum = this.gameControl.indicateNum;
         if (this.number.value === indicateNum.value) {
             this.board.skin = 'UI/正确底板.png';

@@ -1,3 +1,6 @@
+/**
+ * 1.这里导出的是模块不是类，没有this，所以此模块的回调函数要写成func=>{}这种箭头函数，箭头函数会把{}里面的this指向原来的this。
+ */
 export module Animation {
     /**
      * 上下旋转动画
@@ -115,7 +118,7 @@ export module Animation {
     /**
      * 下落
      * @param node 节点
-     * @param targetY 目标高度
+     * @param targetY 目标位置
      * @param rotation 落地角度
      * @param time 花费时间
      * @param delayed 延时时间
@@ -153,7 +156,7 @@ export module Animation {
      * 用于卡牌X轴方向的横向旋转
      * 两个面不一样的卡牌旋转动画，卡牌正面有内容，卡牌背面没有内容，这个内容是一个子节点
      * @param node 节点
-     * @param childName 子节点名称
+     * @param arr 子节点名称数组
      * @param func1 中间回调，是否需要变化卡牌内容,也就是子节点内容
      * @param time 每次旋转1/2次花费时间
      * @param delayed 延时时间
@@ -212,10 +215,10 @@ export module Animation {
     }
 
     /**
-    * 用于卡牌Y轴方向的横向旋转
+    * 用于卡牌Y轴方向的纵向旋转
     * 两个面不一样的卡牌旋转动画，卡牌正面有内容，卡牌背面没有内容，这个内容是一个子节点
     * @param node 节点
-    * @param childName 子节点名称
+    * @param arr 子节点名称数组
     * @param func1 中间回调，是否需要变化卡牌内容,也就是子节点内容
     * @param time 每次旋转1/2次花费时间
     * @param delayed 延时时间
@@ -252,7 +255,7 @@ export module Animation {
     }
 
     /**
-    * 用于卡牌Y轴方向的横向旋转
+    * 用于卡牌Y轴方向的纵向旋转
     * 两个面一样的卡牌旋转动画，正反面内容是一样的
     * @param node 节点
     * @param func1 中间回调，是否需要变化卡牌内容,也就是子节点内容
