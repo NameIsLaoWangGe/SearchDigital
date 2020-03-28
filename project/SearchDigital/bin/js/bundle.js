@@ -262,8 +262,6 @@
             this.background.height = stageHeight;
             this.background.x = 0;
             this.background.y = 0;
-            this.line.y = stageHeight * 0.215;
-            this.line.alpha = 0;
             let location = stageHeight * 0.132;
             this.levelsNode.y = location;
             this.levelsNode.alpha = 0;
@@ -272,6 +270,8 @@
             this.timeCard.y = location;
             this.timeCard.alpha = 0;
             this.cardParent.y = stageHeight * 0.22;
+            this.line.y = (this.cardParent.y + this.indicateCard.y + this.indicateCard.height / 2 + 7) / 2;
+            this.line.alpha = 0;
             this.cardAndParentAdaptive();
         }
         createStartGame() {
@@ -290,7 +290,15 @@
         }
         otherRotate(type) {
             let time = 120;
-            Animation.cardRotateX_OneFace(this.levelsNode, func => this.levelsNum.value = this.levels.toString(), time, 0, func => Animation.cardRotateY_OneFace(this.indicateCard, func => this.indicateNumReset(), time, 0, func => this.otherRotateFunc(type, time)));
+            Animation.cardRotateX_OneFace(this.levelsNode, func => {
+                this.levelsNum.value = this.levels.toString();
+                this.cardAudio(1);
+            }, time, 0, func => {
+                Animation.cardRotateY_OneFace(this.indicateCard, func => this.indicateNumReset(), time, 0, func => {
+                    this.cardAudio(1);
+                    this.otherRotateFunc(type, time);
+                });
+            });
         }
         otherRotateFunc(type, time) {
             if (type === 'nextLevel') {
@@ -298,6 +306,7 @@
             }
             else {
                 Animation.cardRotateX_OneFace(this.timeCard, func => {
+                    this.cardAudio(1);
                     if (type === 'start' || type === 'reStart') {
                         this.timeNum.value = '30s';
                     }
@@ -337,7 +346,7 @@
             Animation.fade_out(this.line, 0, 1, time, delayed * 3, null);
         }
         cardAndParentAdaptive() {
-            this.cardSpacingY = 5;
+            this.cardSpacingY = 10;
             let remainingW = this.self.height - this.cardParent.y - this.self.height * 0.05;
             let cardSpace = remainingW / 7;
             this.cardHeight = cardSpace - this.cardSpacingY;
@@ -349,7 +358,6 @@
             let noChengeJ = Math.floor(Math.random() * len);
             let delayed = 10;
             for (let j = len - 1; j >= 0; j--) {
-                delayed += 50;
                 let card;
                 if (j === noChengeJ) {
                     card = this.createCard('nochange');
@@ -371,6 +379,9 @@
                     card.x = startX2;
                     tagetY = (j - 1) / 2 * (card.height + this.cardSpacingY) + 80;
                 }
+                if (j === 0) {
+                    this.goUpAudio();
+                }
                 Animation.go_up(card, 1800, Math.floor(Math.random() * 2) === 1 ? 30 : -30, tagetY, 500, delayed, func => {
                     if (j === len - 1) {
                         this.timerSwitch = true;
@@ -380,6 +391,7 @@
                         }
                     }
                 });
+                delayed += 50;
             }
         }
         clearAllCard_Next() {
@@ -390,6 +402,9 @@
                 let card = this.cardParent._children[i];
                 Laya.timer.once(i * 50, this, function () {
                     Animation.drop(card, 1800, Math.floor(Math.random() * 2) === 1 ? 30 : -30, 800, 0, func => {
+                        if (i === 1) {
+                            this.dropAudio();
+                        }
                         if (i === len - 1) {
                             this.cardParent.removeChildren(0, len - 1);
                             this.replacementCard('nextLevel');
@@ -405,6 +420,9 @@
             for (let i = 0; i < len; i++) {
                 let card = this.cardParent._children[i];
                 Laya.timer.once(i * 50, this, func => {
+                    if (i === 1) {
+                        this.dropAudio();
+                    }
                     if (card['DigitalCard'].number.value === this.indicateNum.value) {
                         card.zOrder = 1000;
                         this.cardRotating(card, i);
@@ -417,12 +435,21 @@
         }
         cardRotating(card, i) {
             let len = this.cardParent._children.length;
-            Animation.cardRotateY_TowFace(card, ['number'], null, 120, (len - i) * 50 + 500, func => {
+            Animation.cardRotateY_TowFace(card, ['number'], func => this.cardAudio(2), 120, (len - i) * 50 + 500, func => {
                 Animation.drop(card, 1800, Math.floor(Math.random() * 2) === 1 ? 30 : -30, 1000, 500, func => {
                     this.cardParent.removeChildren(0, len - 1);
                     this.createGameOver();
                 });
             });
+        }
+        cardAudio(number) {
+            Laya.SoundManager.playSound('音效/单张牌旋转.mp3', number, Laya.Handler.create(this, function () { }));
+        }
+        dropAudio() {
+            Laya.SoundManager.playSound('音效/全体下落.mp3', 1, Laya.Handler.create(this, function () { }));
+        }
+        goUpAudio() {
+            Laya.SoundManager.playSound('音效/连续发牌.mp3', 1, Laya.Handler.create(this, function () { }));
         }
         clearAllClicks() {
             for (let index = 0; index < this.cardParent._children.length; index++) {
@@ -547,6 +574,31 @@
         }
     }
 
+    class LevelsNode extends Laya.Script {
+        onEnable() {
+            this.self = this.owner;
+            this.gameControl = this.self.scene['Gamecontrol'];
+            this.cardParent = this.gameControl.cardParent;
+            this.indicateCard = this.gameControl.indicateCard;
+            this.self['LevelsNode'] = this;
+        }
+        levelsNodeAni() {
+            let time = 100;
+            Laya.Tween.to(this.self, { scaleX: 0 }, time, null, Laya.Handler.create(this, function () {
+                this.levelsNum.alpha = 0;
+                Laya.Tween.to(this.self, { scaleX: 1 }, time, null, Laya.Handler.create(this, function () {
+                    Laya.Tween.to(this.self, { scaleX: 0 }, time, null, Laya.Handler.create(this, function () {
+                        Laya.Tween.to(this.self, { scaleX: 1 }, time - 50, null, Laya.Handler.create(this, function () {
+                            this.levelsNum.alpha = 1;
+                        }), 0);
+                    }), 0);
+                }), 0);
+            }), 0);
+        }
+        onDisable() {
+        }
+    }
+
     var Clicks;
     (function (Clicks) {
         function clicksOn(effect, target, caller, down, move, up, out) {
@@ -582,8 +634,11 @@
         Clicks.clicksOff = clicksOff;
     })(Clicks || (Clicks = {}));
     class Btn_LargenEffect {
+        constructor() {
+        }
         down(event) {
             event.currentTarget.scale(1.1, 1.1);
+            Laya.SoundManager.playSound('音效/按钮点击.mp3', 1, Laya.Handler.create(this, function () { }));
         }
         up(event) {
             event.currentTarget.scale(1, 1);
@@ -631,9 +686,11 @@
             this.self.zOrder = 100;
             let indicateNum = this.gameControl.indicateNum;
             if (this.number.value === indicateNum.value) {
+                Laya.SoundManager.playSound('音效/点击正确.mp3', 1, Laya.Handler.create(this, function () { }));
                 this.board.skin = 'UI/正确底板.png';
             }
             else {
+                Laya.SoundManager.playSound('音效/点击错误.mp3', 1, Laya.Handler.create(this, function () { }));
                 this.board.skin = 'UI/错误底板.png';
             }
         }
@@ -668,6 +725,7 @@
             this.gameControl.adaptiveOther(this.self);
             this.appaer();
             this.gameControl.wxPostData();
+            Laya.SoundManager.playSound('音效/结束.mp3', 1, Laya.Handler.create(this, function () { }));
         }
         appaer() {
             let firstY = 1800;
@@ -682,7 +740,7 @@
             let targetX = Laya.stage.width / 2;
             let targetY = this.logo.y + (this.self.y - this.self.height / 2) - 150;
             Animation.move_changeRotate(this.levelsNode, targetX, targetY, 0.5, 45, time, func => this.logoSwitch = true);
-            Animation.cardRotateX_TowFace(this.levelsNode, ['levelsNum'], null, 100, 0, null);
+            Animation.cardRotateX_TowFace(this.levelsNode, ['levelsNum'], func => this.gameControl.cardAudio(2), 100, 0, null);
             Animation.fade_out(this.indicateCard, 1, 0, time * 2, 60, func => this.clicksOnBtn());
             Animation.fade_out(this.timeCard, 1, 0, time * 2, 30, null);
             Animation.fade_out(this.line, 1, 0, time * 2, 0, null);
@@ -692,7 +750,7 @@
             let targetX = 108;
             let targetY = this.indicateCard.y;
             Animation.move_changeRotate(this.levelsNode, targetX, targetY, 0.5, -45, time, null);
-            Animation.cardRotateX_TowFace(this.levelsNode, ['levelsNum'], null, 100, 0, null);
+            Animation.cardRotateX_TowFace(this.levelsNode, ['levelsNum'], func => this.gameControl.cardAudio(2), 100, 0, null);
             Animation.fade_out(this.indicateCard, 0, 1, time * 2, 100, null);
             Animation.fade_out(this.timeCard, 0, 1, time * 2, 200, null);
             Animation.fade_out(this.line, 0, 1, time * 2, 500, func => this.nodeDisplayFunc(type));
@@ -839,7 +897,8 @@
             let time = 800;
             let delayed = 150;
             let firstY = 1800;
-            Animation.go_up(this.logo, firstY, Math.floor(Math.random() * 2) === 1 ? 45 : -45, 416, time, 0, null);
+            Animation.go_up(this.logo, firstY, Math.floor(Math.random() * 2) === 1 ? 45 : -45, 416, time, 0, func => {
+            });
             Animation.go_up(this.btn_start, firstY, Math.floor(Math.random() * 2) === 1 ? 45 : -45, 565, time, delayed * 1, null);
             Animation.go_up(this.btn_adv, firstY, Math.floor(Math.random() * 2) === 1 ? 45 : -45, 667, time, delayed * 2, null);
             Animation.go_up(this.btn_ranking, firstY, Math.floor(Math.random() * 2) === 1 ? 45 : -45, 877, time, delayed * 3, null);
@@ -941,6 +1000,7 @@
         static init() {
             var reg = Laya.ClassUtils.regClass;
             reg("Script/GameControl.ts", GameControl);
+            reg("Script/LevelsNode.ts", LevelsNode);
             reg("Script/DigitalCard.ts", DigitalCard);
             reg("Script/GameOver.ts", GameOver);
             reg("Script/Ranking.ts", Ranking);
@@ -956,7 +1016,7 @@
     GameConfig.startScene = "Scene/MainScene.scene";
     GameConfig.sceneRoot = "";
     GameConfig.debug = false;
-    GameConfig.stat = true;
+    GameConfig.stat = false;
     GameConfig.physicsDebug = false;
     GameConfig.exportSceneToJson = true;
     GameConfig.init();

@@ -30,7 +30,7 @@ export default class BigRank extends ui.test.BigUI {
         console.log('出现动画开始播放！')
         Laya.stage.addChild(this);
         this.alpha = 0;
-        Laya.Tween.to(this, { alpha: 1 }, 500, null, Laya.Handler.create(this, function () {
+        Laya.Tween.to(this, { alpha: 1 }, 200, null, Laya.Handler.create(this, function () {
         }, []), 500);
     }
 

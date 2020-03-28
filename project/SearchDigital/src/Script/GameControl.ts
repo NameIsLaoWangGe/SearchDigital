@@ -154,9 +154,6 @@ export default class GameControl extends Laya.Script {
         this.background.x = 0;
         this.background.y = 0;
 
-        this.line.y = stageHeight * 0.215;
-        this.line.alpha = 0;
-
         let location = stageHeight * 0.132;
         this.levelsNode.y = location;
         this.levelsNode.alpha = 0;
@@ -169,6 +166,8 @@ export default class GameControl extends Laya.Script {
 
         this.cardParent.y = stageHeight * 0.22;
 
+        this.line.y = (this.cardParent.y + this.indicateCard.y + this.indicateCard.height / 2 + 7) / 2;//在这两个元素的中间位置
+        this.line.alpha = 0;
         this.cardAndParentAdaptive();
     }
 
@@ -177,7 +176,6 @@ export default class GameControl extends Laya.Script {
         let startGame = Laya.Pool.getItemByCreateFun('startGame', this.startGame.create, this.startGame) as Laya.Sprite;
         this.self.addChild(startGame);
     }
-
     /**牌局开始
      * 一种情况是重新开始
      * 一种情况是开始游戏界面进入的开始
@@ -206,9 +204,17 @@ export default class GameControl extends Laya.Script {
     otherRotate(type): void {
         let time = 120;
         // 等级卡牌旋转动画
-        Animation.cardRotateX_OneFace(this.levelsNode, func => this.levelsNum.value = this.levels.toString(), time, 0, func =>
+        Animation.cardRotateX_OneFace(this.levelsNode, func => {
+            this.levelsNum.value = this.levels.toString();
+            this.cardAudio(1);
+        }, time, 0, func => {
+            //提示卡牌旋转动画
             Animation.cardRotateY_OneFace(this.indicateCard, func => this.indicateNumReset(), time, 0,
-                func => this.otherRotateFunc(type, time)));
+                func => {
+                    this.cardAudio(1);
+                    this.otherRotateFunc(type, time);
+                })
+        });
     }
 
     /**节点变换回调*/
@@ -218,6 +224,7 @@ export default class GameControl extends Laya.Script {
             this.cardCollection();
         } else {
             Animation.cardRotateX_OneFace(this.timeCard, func => {
+                this.cardAudio(1);
                 if (type === 'start' || type === 'reStart') {
                     this.timeNum.value = '30s';
                 } else if (type === 'adv') {
@@ -263,7 +270,7 @@ export default class GameControl extends Laya.Script {
     otherAppear(): void {
         let time = 200;
         let delayed = 150;
-        // 提示卡牌动画
+        // 等级节点动画
         Animation.fade_out(this.levelsNode, 0, 1, time, delayed * 0, null);
         // 提示卡牌动画
         Animation.fade_out(this.indicateCard, 0, 1, time, delayed * 1, null);
@@ -279,7 +286,7 @@ export default class GameControl extends Laya.Script {
     private cardSpacingY: number;
     /**卡牌高度和卡牌父节点的适配规则*/
     cardAndParentAdaptive(): void {
-        this.cardSpacingY = 5;
+        this.cardSpacingY = 10;
         // 通过卡牌父节点位置向下算出卡牌可以存放的空间位置
         let remainingW = this.self.height - this.cardParent.y - this.self.height * 0.05;
         // 单个卡牌可以存放的位置
@@ -301,7 +308,6 @@ export default class GameControl extends Laya.Script {
         let zOrder1 = 100;
         for (let j = len - 1; j >= 0; j--) {
             zOrder1--;
-            delayed += 50;
             // 修改数字
             let card: Laya.Sprite;
             if (j === noChengeJ) {
@@ -324,8 +330,12 @@ export default class GameControl extends Laya.Script {
                 card.x = startX2;
                 tagetY = (j - 1) / 2 * (card.height + this.cardSpacingY) + 80;
             }
+            if (j === 0) {
+                this.goUpAudio();
+            }
             // 动画表现
             Animation.go_up(card, 1800, Math.floor(Math.random() * 2) === 1 ? 30 : -30, tagetY, 500, delayed, func => {
+
                 if (j === len - 1) {
                     this.timerSwitch = true;
                     for (let index = 0; index < this.cardParent._children.length; index++) {
@@ -334,6 +344,7 @@ export default class GameControl extends Laya.Script {
                     }
                 }
             });
+            delayed += 50;
         }
     }
 
@@ -348,6 +359,9 @@ export default class GameControl extends Laya.Script {
             let card = this.cardParent._children[i] as Laya.Sprite;
             Laya.timer.once(i * 50, this, function () {
                 Animation.drop(card, 1800, Math.floor(Math.random() * 2) === 1 ? 30 : -30, 800, 0, func => {
+                    if (i === 1) {
+                        this.dropAudio();
+                    }
                     // 如果是创建下一关的话，遍历结束就会创建下一关
                     if (i === len - 1) {
                         this.cardParent.removeChildren(0, len - 1);
@@ -368,6 +382,10 @@ export default class GameControl extends Laya.Script {
         for (let i = 0; i < len; i++) {
             let card = this.cardParent._children[i] as Laya.Sprite;
             Laya.timer.once(i * 50, this, func => {
+                if (i === 1) {
+                    this.dropAudio();
+                }
+
                 if (card['DigitalCard'].number.value === this.indicateNum.value) {
                     card.zOrder = 1000;//层级放在最高位置
                     this.cardRotating(card, i);
@@ -385,15 +403,30 @@ export default class GameControl extends Laya.Script {
     cardRotating(card, i): void {
         let len = this.cardParent._children.length;
         let time = 120;
-        Animation.cardRotateY_TowFace(card, ['number'], null, 120, (len - i) * 50 + 500, func => {
+        Animation.cardRotateY_TowFace(card, ['number'], func => this.cardAudio(2), 120, (len - i) * 50 + 500, func => {
             // 下落
             Animation.drop(card, 1800, Math.floor(Math.random() * 2) === 1 ? 30 : -30, 1000, 500, func => {
                 this.cardParent.removeChildren(0, len - 1);
                 this.createGameOver();
             });
         });
-
     }
+
+    /**播放单张开拍旋转音效*/
+    cardAudio(number): void {
+        Laya.SoundManager.playSound('音效/单张牌旋转.mp3', number, Laya.Handler.create(this, function () { }));
+    }
+
+    /**全体下落*/
+    dropAudio(): void {
+        Laya.SoundManager.playSound('音效/全体下落.mp3', 1, Laya.Handler.create(this, function () { }));
+    }
+
+    /**连续发牌*/
+    goUpAudio(): void {
+        Laya.SoundManager.playSound('音效/连续发牌.mp3', 1, Laya.Handler.create(this, function () { }));
+    }
+
 
     /**清除卡牌上所有的点击事件*/
     clearAllClicks(): void {

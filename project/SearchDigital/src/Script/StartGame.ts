@@ -65,7 +65,6 @@ export default class StartGame extends Laya.Script {
 
 
         this.videoAd = this.gameControl.videoAd;
-
         this.appaer();
     }
 
@@ -75,7 +74,8 @@ export default class StartGame extends Laya.Script {
         let delayed = 150;
         let firstY = 1800;
         // logo上升
-        Animation.go_up(this.logo, firstY, Math.floor(Math.random() * 2) === 1 ? 45 : -45, 416, time, 0, null);
+        Animation.go_up(this.logo, firstY, Math.floor(Math.random() * 2) === 1 ? 45 : -45, 416, time, 0, func => {
+        });
         // 开始按钮上升
         Animation.go_up(this.btn_start, firstY, Math.floor(Math.random() * 2) === 1 ? 45 : -45, 565, time, delayed * 1, null);
         // 开始按钮上升

@@ -41,10 +41,10 @@ export default class GameOver extends Laya.Script {
 
         this.logoSwitch = false;
         this.logoChange = 'appear';
-
         this.gameControl.adaptiveOther(this.self);
         this.appaer();
         this.gameControl.wxPostData();
+        Laya.SoundManager.playSound('音效/结束.mp3', 1, Laya.Handler.create(this, function () { }));
     }
 
     /**出现动画*/
@@ -64,7 +64,7 @@ export default class GameOver extends Laya.Script {
         let targetX = Laya.stage.width / 2;
         let targetY = this.logo.y + (this.self.y - this.self.height / 2) - 150;//y在logo的世界坐标-100的位置
         Animation.move_changeRotate(this.levelsNode, targetX, targetY, 0.5, 45, time, func => this.logoSwitch = true);
-        Animation.cardRotateX_TowFace(this.levelsNode, ['levelsNum'], null, 100, 0, null);
+        Animation.cardRotateX_TowFace(this.levelsNode, ['levelsNum'], func => this.gameControl.cardAudio(2), 100, 0, null);
 
         // 提示卡牌隐藏动画
         Animation.fade_out(this.indicateCard, 1, 0, time * 2, 60, func => this.clicksOnBtn());
@@ -86,7 +86,7 @@ export default class GameOver extends Laya.Script {
         let targetX = 108;//原位置
         let targetY = this.indicateCard.y;//转换为当前self坐标系坐标
         Animation.move_changeRotate(this.levelsNode, targetX, targetY, 0.5, -45, time, null);
-        Animation.cardRotateX_TowFace(this.levelsNode, ['levelsNum'], null, 100, 0, null);
+        Animation.cardRotateX_TowFace(this.levelsNode, ['levelsNum'], func => this.gameControl.cardAudio(2), 100, 0, null);
 
         // 提示卡牌动画
         Animation.fade_out(this.indicateCard, 0, 1, time * 2, 100, null);

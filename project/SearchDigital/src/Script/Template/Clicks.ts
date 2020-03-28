@@ -5,6 +5,7 @@ export module Clicks {
     /**
      * 点击事件注册
      * @param effect 效果类型
+     * @param soundUrl 音效的地址
      * @param target 节点
      * @param caller 指向脚本（this）引用
      * @param down 按下函数
@@ -58,12 +59,15 @@ export module Clicks {
 export default Clicks;
 
 /**
- * 点击放大的按钮点击效果
+ * 点击放大的按钮点击效果,每个类是一种效果，和点击的声音一一对应
  */
 export class Btn_LargenEffect {
+    constructor() {
+    }
     /**按下*/
     down(event): void {
         event.currentTarget.scale(1.1, 1.1);
+        Laya.SoundManager.playSound('音效/按钮点击.mp3', 1, Laya.Handler.create(this, function () {}));
     }
     /**按下*/
     up(event): void {

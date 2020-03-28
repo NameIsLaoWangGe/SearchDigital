@@ -41,8 +41,8 @@ P 01BAE7F5 vslider.png
 D UI
 R 64407641 +0123456789ks.png
 P FFB16BC1 logo.png
-P E8E6E40D 任务.png
-P ABBC029A 关卡数.png
+P 4107DDCF 任务.png
+P AD3D200C 关卡数.png
 P 0AACBC29 分享按钮.png
 R 35E71E07 分割线.png
 P D6C12F94 分数图标.png
@@ -54,12 +54,21 @@ R 844CFD5F 排行栏.png
 P BE36F251 排行榜.png
 R 04A7AE81 排行榜底板.png
 R 9BA56D18 效果图.png
-P B1A6FF8D 数字底板.png
-P 6ACB1426 时间.png
-P 9E64A8B3 正确底板.png
+P D9C20A07 数字底板.png
+P 172BF9F9 时间.png
+P 58B0E794 正确底板.png
 R C380A45A 背景图.png
 P 1C5B347E 返回按钮.png
 P 827BAC28 重来按钮.png
-P 5BCA5927 错误底板.png
+P E81B4391 错误底板.png
 R 129BD0E2 防沉迷文字.png
 P 2668466B 黑色遮罩.png
+D 音效
+R 6D5BFA13 全体下落.mp3
+R A97C282E 单张发牌.mp3
+R CD190B07 单张牌旋转.mp3
+R 2ECE811A 按钮点击.mp3
+R EFC09A63 点击正确.mp3
+R C2A4CDAB 点击错误.mp3
+R A0753F90 结束.mp3
+R 31C4E9A5 连续发牌.mp3
