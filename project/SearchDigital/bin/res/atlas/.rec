@@ -40,27 +40,27 @@ P DDDDFB9E vslider$bar.png
 P 01BAE7F5 vslider.png
 D UI
 R 64407641 +0123456789ks.png
-P FFB16BC1 logo.png
-P 4107DDCF 任务.png
-P AD3D200C 关卡数.png
+P B36BB03A logo.png
+P 8F9E9F45 任务.png
+P EBAB3F34 关卡数.png
 P 0AACBC29 分享按钮.png
 R 35E71E07 分割线.png
 P D6C12F94 分数图标.png
 P 395A07AF 失败字体.png
 P B47B8633 广告按钮.png
 P A50BCAE9 开始游戏按钮.png
-P DDA5BC10 排行按钮.png
+P 1AFB5021 排行按钮.png
 R 844CFD5F 排行栏.png
 P BE36F251 排行榜.png
 R 04A7AE81 排行榜底板.png
 R 9BA56D18 效果图.png
-P D9C20A07 数字底板.png
-P 172BF9F9 时间.png
-P 58B0E794 正确底板.png
+P D82D8608 数字底板.png
+P ED423070 时间.png
+P 8F9E9F45 正确底板.png
 R C380A45A 背景图.png
-P 1C5B347E 返回按钮.png
+P C9616C8F 返回按钮.png
 P 827BAC28 重来按钮.png
-P E81B4391 错误底板.png
+P 7B72ED66 错误底板.png
 R 129BD0E2 防沉迷文字.png
 P 2668466B 黑色遮罩.png
 D 音效

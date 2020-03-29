@@ -695,8 +695,8 @@
             }
         }
         up(event) {
+            this.gameControl.clearAllClicks();
             this.gameControl.timerSwitch = false;
-            this.cardClicksOff();
             event.currentTarget.scale(1, 1);
             let indicateNum = this.gameControl.indicateNum;
             if (this.number.value === indicateNum.value) {
