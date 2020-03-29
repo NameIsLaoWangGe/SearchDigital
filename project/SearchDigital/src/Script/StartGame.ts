@@ -1,5 +1,6 @@
 import { Clicks } from "./Template/Clicks";
 import { Animation } from "./Template/Animation";
+import { PalyAudio } from "./Template/PlayAudio";
 
 export default class StartGame extends Laya.Script {
     /** @prop {name:logo, tips:"游戏结束标题", type:Node}*/
@@ -63,8 +64,14 @@ export default class StartGame extends Laya.Script {
         this.gameControl.adaptiveOther(this.self);
         this.gameControl.childAdaptive(this.anti_addiction, this.self, Laya.stage.height * 9 / 10);
 
-
         this.videoAd = this.gameControl.videoAd;
+
+        // 第一次出现开始界面不播放音效，第二次开始播放
+        if (this.gameControl.startFirstAudio > 0) {
+            PalyAudio.aAingleCard(5);
+        }
+        this.gameControl.startFirstAudio += 1;
+
         this.appaer();
     }
 

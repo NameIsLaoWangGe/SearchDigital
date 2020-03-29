@@ -1,6 +1,7 @@
 import GameControl from "./GameControl";
 import { Animation } from "./Template/Animation";
 import { Clicks } from "./Template/Clicks";
+import { PalyAudio } from "./Template/PlayAudio";
 export default class DigitalCard extends Laya.Script {
     /** @prop {name:board, tips:"数字底板", type:Node}*/
     public board: Laya.Image;
@@ -64,10 +65,10 @@ export default class DigitalCard extends Laya.Script {
         this.self.zOrder = 100;//点击后的层级变为最高
         let indicateNum = this.gameControl.indicateNum;
         if (this.number.value === indicateNum.value) {
-            Laya.SoundManager.playSound('音效/点击正确.mp3', 1, Laya.Handler.create(this, function () { }));
+            PalyAudio.clickRight(1);
             this.board.skin = 'UI/正确底板.png';
         } else {
-            Laya.SoundManager.playSound('音效/点击错误.mp3', 1, Laya.Handler.create(this, function () { }));
+            PalyAudio.clickError(1);
             this.board.skin = 'UI/错误底板.png';
         }
     }

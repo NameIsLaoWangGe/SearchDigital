@@ -13,15 +13,15 @@ export default class BigRank extends ui.test.BigUI {
     public _key: String = 'test10088';
     /**list初始化使用的数据 */
     private arr: Array<any> = [
-        { index: 1, avatarIP: 'rank/头像.png', UserName: "老王哥", RankValue: 1 },
-        { index: 2, avatarIP: 'rank/头像.png', UserName: "王哥", RankValue: 2 },
-        { index: 3, avatarIP: 'rank/头像.png', UserName: "老王哥", RankValue: 3 },
-        { index: 4, avatarIP: 'rank/头像.png', UserName: "狭路相逢", RankValue: 4 },
-        { index: 5, avatarIP: 'rank/头像.png', UserName: "我们来做游戏", RankValue: 5 },
-        { index: 6, avatarIP: 'rank/头像.png', UserName: "相逢何必曾相识", RankValue: 8 },
-        { index: 7, avatarIP: 'rank/头像.png', UserName: "玩我游戏我很开心", RankValue: 10 },
-        { index: 12, avatarIP: 'rank/头像.png', UserName: "玩我游戏我很开心", RankValue: 11 },
-        { index: 11, avatarIP: 'rank/头像.png', UserName: "玩我游戏我很开心", RankValue: 12 }
+        // { index: 1, avatarIP: 'rank/头像.png', UserName: "老王哥", RankValue: 1 },
+        // { index: 2, avatarIP: 'rank/头像.png', UserName: "王哥", RankValue: 2 },
+        // { index: 3, avatarIP: 'rank/头像.png', UserName: "老王哥", RankValue: 3 },
+        // { index: 4, avatarIP: 'rank/头像.png', UserName: "狭路相逢", RankValue: 4 },
+        // { index: 5, avatarIP: 'rank/头像.png', UserName: "我们来做游戏", RankValue: 5 },
+        // { index: 6, avatarIP: 'rank/头像.png', UserName: "相逢何必曾相识", RankValue: 8 },
+        // { index: 7, avatarIP: 'rank/头像.png', UserName: "玩我游戏我很开心", RankValue: 10 },
+        // { index: 12, avatarIP: 'rank/头像.png', UserName: "玩我游戏我很开心", RankValue: 11 },
+        // { index: 11, avatarIP: 'rank/头像.png', UserName: "玩我游戏我很开心", RankValue: 12 }
     ]
 
 
@@ -29,9 +29,6 @@ export default class BigRank extends ui.test.BigUI {
     appear(): void {
         console.log('出现动画开始播放！')
         Laya.stage.addChild(this);
-        this.alpha = 0;
-        Laya.Tween.to(this, { alpha: 1 }, 200, null, Laya.Handler.create(this, function () {
-        }, []), 500);
     }
 
     /**

@@ -1,5 +1,7 @@
 /**
- * 1.这里导出的是模块不是类，没有this，所以此模块的回调函数要写成func=>{}这种箭头函数，箭头函数会把{}里面的this指向 原来的this。
+ * 1.这里导出的是模块不是类，没有this，所以此模块的回调函数要写成func=>{}这种箭头函数，箭头函数会把{}里面的this指向
+原来的this。
+ * 2.点击事件模块
  */
 export module Clicks {
     /**
@@ -67,7 +69,7 @@ export class Btn_LargenEffect {
     /**按下*/
     down(event): void {
         event.currentTarget.scale(1.1, 1.1);
-        Laya.SoundManager.playSound('音效/按钮点击.mp3', 1, Laya.Handler.create(this, function () {}));
+        Laya.SoundManager.playSound('音效/按钮点击.mp3', 1, Laya.Handler.create(this, function () { }));
     }
     /**按下*/
     up(event): void {
