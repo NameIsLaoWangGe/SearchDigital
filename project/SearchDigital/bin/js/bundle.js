@@ -565,7 +565,7 @@
             if (Laya.Browser.onMiniGame) {
                 let wx = Laya.Browser.window.wx;
                 wx.shareAppMessage({
-                    title: '数字找茬',
+                    title: '你的数字敏感度及格了吗？',
                     imageUrlId: 'CRYATpcgSFGkeB4Hs75jOQ',
                     imageUrl: 'https://mmocgame.qpic.cn/wechatgame/9zdKibmXJ3RsmFpXn6UAV4ScT8ulA4wzqUUNicKWDIaODZbuv38lkBBOBQv8XbxOI0/0'
                 });
